@@ -1,12 +1,12 @@
 # Architecture Decision Queue
 
-Status: ACTIVE — product-owner decisions DEC-001..DEC-012 are selected. Phase 1 technical investigations are in progress; unresolved choices remain explicitly gated.
+Status: ACTIVE — product-owner decisions DEC-001..DEC-016 are selected. Remaining items are technical verification and evidence work; affected implementation remains gated by Phase 1 approval.
 
 This document prevents the coding agent from silently making product or architecture choices that materially affect review behavior, trust, cost, UX, or long-term system shape.
 
 ## Closed owner decisions
 
-See `docs/architecture/owner-decisions-2026-09-14.md` for the full rationale and implementation consequences.
+See `docs/architecture/owner-decisions-2026-09-14.md` for full rationale and implementation consequences.
 
 - DEC-001 LLM/model provider strategy → **C**: provider-neutral interface, one initial provider/model.
 - DEC-002 Embedding strategy → **B**: benchmark retrieval candidates; derive/freeze dimension after selection.
@@ -19,60 +19,56 @@ See `docs/architecture/owner-decisions-2026-09-14.md` for the full rationale and
 - DEC-009 Large PR handling → **B + human intervention**; staged/multi-pass with explicit scope.
 - DEC-010 Deployment → **B**: managed containers; AWS is an approved candidate, including ECS/Fargate.
 - DEC-011 GitHub App installation scope → **C**, fallback to simpler **B** if combined UX becomes disproportionate.
-- DEC-012 `pull_request.edited` behavior → **A**: do not automatically trigger a fresh full review for title/body-only edits; ingest metadata for context/history and allow explicit future re-review through policy if needed.
+- DEC-012 `pull_request.edited` behavior → **A**: do not automatically trigger a fresh full review for title/body-only edits.
+- DEC-013 Autonomy policy evolution → **A initially → evolve toward B when evaluation earns it**.
+- DEC-014 HITL role model → **A externally + C internally**.
+- DEC-015 Privacy and retention model → **C: retention classes**.
+- DEC-016 Tool/sandbox execution → **A initially → evolve toward B only when evidence justifies it**.
 
-## Technical investigations completed / recommendations ready
+## Technical verification remaining
 
 ### TDEC-001 — Exact GitHub App permission set
 
-**Investigation status: recommendation ready.** Proposed minimum repository permissions are Metadata: read, Contents: read, Pull requests: write, with Checks: write conditional on the final publication contract. No source-content write, administration, workflows, secrets, deployments, or security-alert write permissions are proposed for the initial review product.
-
-Evidence and rationale are recorded in `docs/architecture/phase-1-github-boundary-analysis.md`.
+Recommendation ready: Metadata read, Contents read, Pull requests write; Checks write only if the validated publication contract requires Check Runs. Final verification must include installation behavior and API contract tests.
 
 ### TDEC-002 — GitHub webhook event matrix
 
-**Investigation status: recommendation ready.** Automatic review triggering remains centered on `pull_request`; human review/comment events are ingested as feedback rather than recursively creating reviews. `pull_request.edited` is explicitly decided as no automatic fresh review.
-
-Evidence and rationale are recorded in `docs/architecture/phase-1-github-boundary-analysis.md`.
+Recommendation ready: automatic review triggering centered on `pull_request`; feedback events do not recursively start reviews; `pull_request.edited` does not start a fresh full review.
 
 ### TDEC-003 — Review identity and tenant/install mapping
 
-**Investigation status: recommendation ready.** The authorization model separates GitHub App installation from application user identity and derives logical review identity from installation + repository + PR + review-relevant head/event state. Repository scope is never inferred from dashboard visibility.
-
-Detailed analysis is recorded in `docs/architecture/phase-1-identity-tenancy-analysis.md`.
+Recommendation ready: separate App installation authorization from application user identity, with review identity scoped by installation/repository/PR/head/event semantics and tenant-aware access paths.
 
 ### TDEC-004 — Embedding benchmark dataset and acceptance threshold
 
-**Investigation status: benchmark contract ready.** The benchmark will compare candidate retrieval approaches using representative target ecosystems, development/holdout separation, retrieval quality, latency, cost, storage impact, and vector-index compatibility. No vector dimension is frozen before model selection.
-
-Detailed benchmark contract is recorded in `docs/architecture/phase-1-retrieval-benchmark.md`.
-
-## Owner decision required before affected contract is final
-
-### TDEC-005 — Exact autonomy policy schema
-
-**Analysis complete; owner decision required.** Proposed default is Option A (conservative severity-first), with the policy engine designed to support later calibrated evidence+confidence routing. See `docs/architecture/phase-1-autonomy-policy-analysis.md`.
-
-### TDEC-006 — HITL role matrix
-
-**Analysis complete; owner decision required.** Proposed default is Option A (Reviewer + Repository administrator) behind an internal capability-based authorization interface. See `docs/architecture/phase-1-hitl-role-analysis.md`.
-
-### TDEC-007 — Privacy and retention policy
-
-**Analysis complete; owner decision required.** Proposed direction is retention classes with minimal raw repository/model-payload retention and longer-lived normalized finding/HITL/audit records. Exact durations and deletion/export commitments remain owner decisions. See `docs/architecture/phase-1-privacy-retention-analysis.md`.
+Benchmark contract ready. Candidate embedding/model and native vector dimension remain unfrozen until reproducible benchmark evidence exists.
 
 ### TDEC-008 — Managed cloud topology
 
-**Investigation status: recommendation ready pending final security/cost verification.** Leading candidate is ECS/Fargate + ALB + private networking + managed secrets + managed Redis-compatible queue + Tiger/Postgres durable spine. See `docs/architecture/phase-1-aws-topology-analysis.md`.
+Recommendation ready pending final security/cost verification. Leading candidate: ECS/Fargate + managed ingress + private networking + managed secrets + managed Redis-compatible queue + Tiger/Postgres-compatible durable spine.
 
-### TDEC-009 — Tool/sandbox execution policy
+## Explicit future-extension boundaries
 
-**Analysis complete; owner decision required.** Proposed initial release is Option A: no arbitrary repository code execution; keep a capability boundary ready for a future isolated execution service if evaluation proves it necessary. See `docs/architecture/phase-1-tool-sandbox-analysis.md`.
+### Autonomy
+
+Option B is a future policy-engine evolution, not a rewrite. The policy engine must accept typed evidence/confidence/policy inputs so calibration can increase automation without changing specialist contracts.
+
+### HITL authorization
+
+Initial customer roles are Reviewer and Repository administrator. Authorization is implemented through capabilities so enterprise roles can be introduced without redesigning domain records or review workflows.
+
+### Privacy
+
+Retention classes are fixed as the architectural model; exact durations, deletion, export, legal hold, and backup-erasure behavior remain policy/configuration concerns and must be verified before production launch.
+
+### Tool execution
+
+Initial reviewer execution is non-arbitrary: GitHub/API/static/retrieval/model evidence only. Future sandbox execution must be a separate capability/service with explicit authorization and isolation; it must not change the specialist finding contract.
 
 ## Decision protocol
 
-For every remaining technical decision, the coding agent investigates and explains the problem, alternatives, consequences, and recommendation. Product-owner input is required whenever the choice changes product behavior, trust, cost, user workflow, or an irreversible architecture boundary.
+For every technical decision, the coding agent investigates and explains the problem, alternatives, consequences, and recommendation. Product-owner input is required whenever the choice changes product behavior, trust, cost, user workflow, or an irreversible architecture boundary.
 
 ## Rule
 
-No implementation task may silently convert an unresolved decision into an irreversible architecture choice. Where temporary implementation work is necessary, use an explicit interface/configuration seam and record the temporary assumption.
+No implementation task may silently convert an unresolved decision into an irreversible architecture choice. Temporary implementation assumptions must use explicit interfaces/configuration seams and be recorded in durable architecture state.
