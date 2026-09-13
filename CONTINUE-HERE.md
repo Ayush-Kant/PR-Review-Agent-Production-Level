@@ -29,12 +29,13 @@ Production-intent branch: `main`
 - Recorded owner decisions in `docs/architecture/owner-decisions-2026-09-14.md`.
 - Updated `docs/architecture/decision-queue.md` with closed owner decisions and remaining technical decisions.
 - Refined `docs/architecture/phase-1-proposal.md` for the cloud GitHub-App SaaS model, installation/tenant boundaries, large-PR passes, retrieval benchmark, and managed deployment.
-- Added this handoff protocol.
+- Added and persisted this handoff protocol.
 - Synchronized `.genesis/project.json` in commit `81f64f6f3ed09e1338429a1a999bf9c950721d07`.
+- Final verified `develop` HEAD for this checkpoint: `114a94674e611a06eed0f65da3c2afbcf1bbacb2`.
 
 ## Next admissible work
 
-1. Verify `develop` points at the Genesis synchronization checkpoint.
+1. Verify the current `develop` HEAD and canonical Genesis file.
 2. Perform Phase 0 verification/independent review.
 3. Resolve only the remaining technical decisions listed in `docs/architecture/decision-queue.md` as required for Phase 1.
 4. Obtain human Phase 0 approval.
