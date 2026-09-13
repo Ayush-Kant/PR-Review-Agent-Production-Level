@@ -223,3 +223,48 @@ No degraded result is presented as equivalent to a full review. Limitations beco
 Large pull requests may be split into staged passes. Each pass carries its own context/evidence scope and is linked to the same PR lifecycle. A later pass must never silently overwrite the evidence of an earlier pass.
 
 The product may explicitly surface incomplete coverage and request a human-directed additional pass instead of fabricating full coverage.
+
+## 14. Review-generation concurrency contract
+
+Each active review pass has a monotonically increasing `head_generation` or equivalent durable generation token tied to the reviewed head SHA.
+
+Before a worker performs any externally visible action, it must prove that its generation is still current. A stale worker must transition to `SUPERSEDED` or `STALE_WORK` and must not publish findings.
+
+The check is required at minimum:
+
+1. immediately before aggregation commits canonical findings;
+2. immediately before policy/publication authorization;
+3. immediately before each external publication mutation.
+
+A queue retry cannot resurrect an older head generation merely because the older attempt remains physically runnable.
+
+## 15. Publication reconciliation contract
+
+Publication uses a deterministic `publication_id` and a durable reconciliation state:
+
+```text
+NOT_STARTED
+  -> REQUESTED
+  -> CONFIRMED
+  -> UNCERTAIN
+  -> RECONCILING
+  -> CONFIRMED | NOT_PUBLISHED | TERMINAL_FAILURE
+```
+
+`UNCERTAIN` means the client cannot prove whether GitHub accepted the mutation, such as a timeout after the request was sent. The system must reconcile GitHub state using stable identity and current commit context before retrying.
+
+Inline publication failures caused by an outdated line/range must not be silently converted into a new inline target. The adapter may fall back to a summary surface only when policy permits it, and the durable record must retain the reason for the fallback.
+
+## 16. Snapshot-consistent retrieval contract
+
+Every review pass binds to a repository snapshot identified by at least:
+
+- repository ID;
+- reviewed head SHA;
+- base SHA when needed for diff semantics;
+- repository index version;
+- context-assembly version.
+
+Retrieved evidence is admissible only when its snapshot identity matches the review pass or when an explicit compatibility rule marks it as safe. A moving index must never silently turn mixed-commit evidence into one current-head conclusion.
+
+If snapshot alignment cannot be established, the system marks the context stale/unknown and routes the review through a degraded or HITL path instead of treating it as fully evidenced.
