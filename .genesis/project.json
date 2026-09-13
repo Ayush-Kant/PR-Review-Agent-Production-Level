@@ -1,0 +1,147 @@
+{
+  "schema_version": 2,
+  "project": {
+    "name": "PR-Review-Agent-Production-Level",
+    "mode": "new-product",
+    "profile": "production",
+    "objective": "Build a production-grade, evidence-driven AI pull-request review system that analyzes PR changes in repository context, runs specialized review agents, aggregates and confidence-gates findings, escalates uncertain or critical decisions to humans, publishes justified findings to GitHub, and records durable evidence for reliability, evaluation, economics, governance, and continuous improvement.",
+    "constraints": [
+      "Develop on develop; main is production-intent only.",
+      "Genesis engineering protocol is mandatory during the project lifecycle.",
+      "Product implementation is prohibited until Phase 0 specification and planning gates are satisfied.",
+      "Existing Multiagent-PR-Review-System is reference material only.",
+      "Architecture must remain modular and preserve explicit trust boundaries."
+    ],
+    "non_goals": [
+      "Build a generic autonomous coding agent instead of a PR review system.",
+      "Add infrastructure solely to make the project appear more production-grade.",
+      "Treat LLM output or repository content as authoritative instructions.",
+      "Silently promote learned policy changes without measured evaluation and approval."
+    ],
+    "trust_boundary": "GitHub events, PR text, repository contents, retrieved code, tool output, and LLM output are untrusted inputs; privileged actions must cross explicit authenticated and authorized boundaries.",
+    "created_at": "2026-09-14T00:40:00+05:30",
+    "updated_at": "2026-09-14T00:40:00+05:30"
+  },
+  "policy": {
+    "ponytail": "full",
+    "autonomy": "human-in-the-loop",
+    "learned_rule_promotion": "human-required",
+    "cleanup": "propose-only",
+    "traces": {
+      "storage": "local",
+      "commit_raw": false,
+      "redact_secrets": true
+    }
+  },
+  "lifecycle": {
+    "phase": "discovery",
+    "status": "active",
+    "active_task": "SPEC-1",
+    "blocker": null,
+    "next_action": "Complete Phase 0 specification, invariants, decisions, risks, and acceptance criteria; no product implementation code is authorized."
+  },
+  "commands": {},
+  "workflow": {
+    "type": "new-product",
+    "started_at": "2026-09-14T00:40:00+05:30",
+    "spec_check": null,
+    "plan_check": null,
+    "plan_approval": null
+  },
+  "artifacts": [
+    {
+      "id": "SPEC-1",
+      "type": "specification",
+      "path": "SPEC.md",
+      "status": "draft",
+      "requirements": [],
+      "source_hash": null,
+      "approval": null
+    }
+  ],
+  "assumptions": [
+    {
+      "id": "ASM-001",
+      "statement": "GitHub is the first supported SCM/provider integration and the primary review publication surface.",
+      "status": "working"
+    },
+    {
+      "id": "ASM-002",
+      "statement": "The initial specialist set is security, quality, tests, and documentation.",
+      "status": "working"
+    },
+    {
+      "id": "ASM-003",
+      "statement": "LangGraph may be used as the first workflow engine implementation behind an internal abstraction.",
+      "status": "working"
+    },
+    {
+      "id": "ASM-004",
+      "statement": "Tiger Cloud/Postgres-compatible storage is the intended durable data spine, subject to Phase 1/architecture validation.",
+      "status": "working"
+    }
+  ],
+  "invariants": [
+    {"id":"INV-001","statement":"No finding is published without attributable evidence tied to the reviewed change and repository context."},
+    {"id":"INV-002","statement":"No specialist agent may bypass the finding normalization, aggregation, deduplication, and policy gate."},
+    {"id":"INV-003","statement":"Untrusted PR/repository content, retrieved context, tool output, and model output must never become implicit trusted control instructions."},
+    {"id":"INV-004","statement":"Privileged tools must be explicitly scoped, authorized, observable, and least-privileged."},
+    {"id":"INV-005","statement":"Equivalent webhook delivery must not create duplicate review work or duplicate published findings."},
+    {"id":"INV-006","statement":"Every production review decision must be attributable to a review run, agent/event lineage, policy state, and evidence."},
+    {"id":"INV-007","statement":"Low-confidence, critical-impact, or policy-sensitive outcomes must be eligible for human escalation rather than forced publication."},
+    {"id":"INV-008","statement":"Cost controls must be evaluated before expensive model execution where technically possible."},
+    {"id":"INV-009","statement":"Evaluation artifacts and evaluators must be protected from modification by the candidate system under test."},
+    {"id":"INV-010","statement":"Learning or policy changes require measurable baseline/candidate evaluation, independent review, explicit promotion, and rollback capability."},
+    {"id":"INV-011","statement":"The system must prefer slower-but-correct behavior over fast-but-unjustified review output."},
+    {"id":"INV-012","statement":"Durable project decisions, requirements, assumptions, and operational knowledge must not exist only in chat history."}
+  ],
+  "decisions": [
+    {"id":"D0-001","statement":"The new repository is greenfield; the previous PR-review repository is reference material, not the architectural source of truth."},
+    {"id":"D0-002","statement":"develop is the construction and verification branch; main represents production intent."},
+    {"id":"D0-003","statement":"Phase 0 must complete specification and planning gates before product implementation begins."},
+    {"id":"D0-004","statement":"The production system is designed around explicit evidence, policy, auditability, and human escalation rather than comment volume."},
+    {"id":"D0-005","statement":"Specialist agents are parallel domain reviewers; the aggregator is the authority for normalized findings and publication eligibility."}
+  ],
+  "knowledge": [],
+  "tasks": [
+    {
+      "id":"SPEC-1",
+      "outcome":"Produce an approved, implementation-ready Phase 0 product specification",
+      "state":"active",
+      "risk":"medium",
+      "owner":null,
+      "scope":["SPEC.md","docs/phase-0.md",".genesis/project.json"],
+      "inputs":[],
+      "environment":[],
+      "dependencies":[],
+      "requirements":[],
+      "scenarios":[
+        {"actor":"product owner","scope":"Phase 0 specification","environment":"repository develop branch","duration":"one bounded task","observable":"all required specification sections and identifiers are complete","gate":"manual specification review"}
+      ],
+      "gates":[
+        {"id":"independent-review","command":"","mandatory":true,"kind":"review","status":"pending","evidence":null}
+      ],
+      "next_action":"Complete Phase 0 specification, invariants, decisions, risks, metrics, and open questions without writing product implementation code.",
+      "blocker":null,
+      "notes":[],
+      "failures":[],
+      "limitations":[],
+      "created_at":"2026-09-14T00:40:00+05:30",
+      "updated_at":"2026-09-14T00:40:00+05:30"
+    }
+  ],
+  "learning_proposals": [],
+  "cleanup_proposals": [],
+  "controls": [],
+  "attempts": [],
+  "authorizations": [],
+  "experiments": [],
+  "incidents": [],
+  "discovery": {
+    "status":"greenfield",
+    "reference_repository":"Ayush-Kant/Multiagent-PR-Review-System",
+    "reference_policy":"reuse ideas only after explicit requirement, impact analysis, and verification"
+  },
+  "checkpoint": null,
+  "legacy": null
+}
