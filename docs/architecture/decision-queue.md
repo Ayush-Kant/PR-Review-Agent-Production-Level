@@ -1,6 +1,6 @@
 # Architecture Decision Queue
 
-Status: ACTIVE — product-owner decisions DEC-001..DEC-011 have been selected; remaining items are technical decisions requiring investigation before affected implementation.
+Status: ACTIVE — product-owner decisions DEC-001..DEC-012 have been selected; remaining items are technical decisions requiring investigation before affected implementation.
 
 This document prevents the coding agent from silently making product or architecture choices that materially affect review behavior, trust, cost, UX, or long-term system shape.
 
@@ -19,6 +19,7 @@ See `docs/architecture/owner-decisions-2026-09-14.md` for the full rationale and
 - DEC-009 Large PR handling → **B + human intervention**; staged/multi-pass with explicit scope.
 - DEC-010 Deployment → **B**: managed containers; AWS is an approved candidate, including ECS/Fargate.
 - DEC-011 GitHub App installation scope → **C**, fallback to simpler **B** if combined UX becomes disproportionate.
+- DEC-012 `pull_request.edited` behavior → **A**: do not automatically trigger a fresh full review for title/body-only edits; ingest metadata for context/history and allow explicit future re-review through policy if needed.
 
 ## Remaining technical decisions
 
@@ -35,7 +36,7 @@ Rule: least privilege. Do not request broad permissions for future speculative f
 
 ### TDEC-002 — GitHub webhook event matrix
 
-Need to define exactly which events trigger work, which update an existing review, and which are ignored. Idempotency and review lifecycle semantics must be explicit.
+Need to define exactly which events trigger work, which update an existing review, and which are ignored. Idempotency and review lifecycle semantics must be explicit. `pull_request.edited` default behavior is now owner-decided as no automatic fresh full review; exact ingestion/state-update semantics remain technical work.
 
 ### TDEC-003 — Review identity and tenant/install mapping
 
