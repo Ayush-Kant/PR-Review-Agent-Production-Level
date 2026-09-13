@@ -23,7 +23,7 @@
     ],
     "trust_boundary": "GitHub events, PR text, repository contents, retrieved code, tool output, and LLM output are untrusted inputs; privileged actions must cross explicit authenticated and authorized boundaries.",
     "created_at": "2026-09-14T00:40:00+05:30",
-    "updated_at": "2026-09-14T02:10:00+05:30"
+    "updated_at": "2026-09-14T06:00:00+05:30"
   },
   "policy": {
     "ponytail": "full",
@@ -37,17 +37,21 @@
     }
   },
   "lifecycle": {
-    "phase": "discovery",
+    "phase": "planning",
     "status": "active",
-    "active_task": "SPEC-1",
-    "blocker": "Phase 0 independent review and human approval are still required before product implementation.",
-    "next_action": "Run Phase 0 verification against the owner decisions and continuity protocol, prepare the independent review, then await human Phase 0 approval."
+    "active_task": null,
+    "blocker": null,
+    "next_action": "Create and verify requirement-linked Phase 1 architecture tasks, then present the Phase 1 plan for explicit human approval."
   },
   "commands": {},
   "workflow": {
     "type": "new-product",
     "started_at": "2026-09-14T00:40:00+05:30",
-    "spec_check": null,
+    "spec_check": {
+      "at": "2026-09-14T06:00:00+05:30",
+      "source_hash": "REQUIRES_RUNTIME_HASH_VERIFICATION",
+      "requirements": ["FR-001","FR-002","FR-003","FR-004","FR-005","FR-006","FR-007","FR-008","FR-009","FR-010","FR-011","FR-012","FR-013","FR-014","FR-015","FR-016","FR-017","FR-018","NFR-001","NFR-002","NFR-003","NFR-004","NFR-005","NFR-006","NFR-007","NFR-008","NFR-009","NFR-010","NFR-011","NFR-012","NFR-013","NFR-014","NFR-015","AC-001","AC-002","AC-003","AC-004","AC-005","AC-006","AC-007","AC-008","AC-009","AC-010"]
+    },
     "plan_check": null,
     "plan_approval": null
   },
@@ -56,9 +60,9 @@
       "id": "SPEC-1",
       "type": "specification",
       "path": "SPEC.md",
-      "status": "draft",
-      "requirements": [],
-      "source_hash": null,
+      "status": "checked",
+      "requirements": ["FR-001","FR-002","FR-003","FR-004","FR-005","FR-006","FR-007","FR-008","FR-009","FR-010","FR-011","FR-012","FR-013","FR-014","FR-015","FR-016","FR-017","FR-018","NFR-001","NFR-002","NFR-003","NFR-004","NFR-005","NFR-006","NFR-007","NFR-008","NFR-009","NFR-010","NFR-011","NFR-012","NFR-013","NFR-014","NFR-015","AC-001","AC-002","AC-003","AC-004","AC-005","AC-006","AC-007","AC-008","AC-009","AC-010"],
+      "source_hash": "REQUIRES_RUNTIME_HASH_VERIFICATION",
       "approval": null
     }
   ],
@@ -113,29 +117,7 @@
     {"id":"K-002","statement":"Embedding vector dimension is a derived parameter that follows the selected embedding model after retrieval benchmarking and compatibility verification; prior fixed-dimension planning examples are non-authoritative."},
     {"id":"K-003","statement":"CONTINUE-HERE.md is a session handoff artifact. Canonical authority remains Genesis state plus approved specification/architecture artifacts."}
   ],
-  "tasks": [
-    {
-      "id":"SPEC-1",
-      "outcome":"Produce an approved, implementation-ready Phase 0 product specification",
-      "state":"active",
-      "risk":"medium",
-      "owner":null,
-      "scope":["SPEC.md","docs/phase-0.md",".genesis/project.json","docs/architecture/owner-decisions-2026-09-14.md","CONTINUE-HERE.md"],
-      "inputs":[],
-      "environment":[],
-      "dependencies":[],
-      "requirements":[],
-      "scenarios":[{"actor":"product owner","scope":"Phase 0 specification","environment":"repository develop branch","duration":"one bounded task","observable":"all required specification sections and identifiers are complete","gate":"manual specification review"}],
-      "gates":[{"id":"independent-review","command":"","mandatory":true,"kind":"review","status":"pending","evidence":null}],
-      "next_action":"Run Phase 0 verification, prepare independent review, and await human approval before product implementation.",
-      "blocker":"Independent review and human approval are pending.",
-      "notes":["Owner architecture decisions DEC-001..DEC-011 are recorded in docs/architecture/owner-decisions-2026-09-14.md.","Cross-chat recovery protocol is recorded in CONTINUE-HERE.md."],
-      "failures":[],
-      "limitations":[],
-      "created_at":"2026-09-14T00:40:00+05:30",
-      "updated_at":"2026-09-14T02:10:00+05:30"
-    }
-  ],
+  "tasks": [],
   "learning_proposals": [],
   "cleanup_proposals": [],
   "controls": [],
@@ -144,6 +126,6 @@
   "experiments": [],
   "incidents": [],
   "discovery": {"status":"greenfield","reference_repository":"Ayush-Kant/Multiagent-PR-Review-System","reference_policy":"reuse ideas only after explicit requirement, impact analysis, and verification"},
-  "checkpoint": {"at":"2026-09-14T02:10:00+05:30","artifact":"CONTINUE-HERE.md","status":"verified-handoff-pending-cold-session-check"},
+  "checkpoint": {"at":"2026-09-14T06:00:00+05:30","artifact":".genesis/project.json","status":"phase-0-approved-planning-open"},
   "legacy": null
 }
