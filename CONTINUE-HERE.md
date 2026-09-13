@@ -12,14 +12,21 @@ Production-intent branch: `main`
 - Embeddings: benchmark retrieval first; derive/freeze vector dimension only after model selection and compatibility verification.
 - Publication: design for inline review + summary/check; if dual publication cannot be made reliable without unjustified complexity, ship inline review + summary only.
 - Languages: Python, JavaScript, TypeScript, Java, Spring Boot, focused on AI/ML and MERN/PERN/modern JS/TS workloads.
-- HITL identity: GitHub identity + pluggable application RBAC.
-- Autonomy: per-repository configurable policy, conservative by default. Exact policy matrix remains an owner decision under TDEC-005.
+- HITL authentication: GitHub identity + pluggable application RBAC.
+- Autonomy: per-repository configurable policy, conservative by default.
 - Frontend: minimal/capability-driven.
 - Customer experience: hosted cloud SaaS via GitHub App; no customer-side runtime infrastructure.
 - Large PRs: staged/degraded multi-pass review with explicit limitations + human intervention.
 - Deployment: managed containers; AWS ECS/Fargate is an approved candidate.
-- GitHub App installation scope: C, with fallback to simpler B if complexity becomes disproportionate.
-- PR title/body edits: do not automatically trigger a fresh full review; preserve edited metadata for later code-triggered review context.
+- GitHub App installation scope: support individual/repository-oriented and organization/account-oriented flows where practical; simplify if disproportionate.
+- PR title/body edits: do not automatically trigger a fresh full review; preserve metadata for later review context.
+
+## Phase 1 owner decisions
+
+- **Autonomy:** A initially → evolve toward B when evaluation earns it. Critical never auto-publishes; high goes to HITL during initial calibration; medium/low require evidence completeness, freshness, provenance, and calibrated confidence. Repository policy may tighten but not weaken global safety invariants.
+- **HITL roles:** A externally + C internally. Customer UX starts with Reviewer and Repository administrator; internal authorization is capability-based so enterprise roles can be added later without changing review/domain models.
+- **Privacy:** C retention classes. Secrets never in application DB; execution context is ephemeral; evidence/payload retention is minimized; findings/HITL/audit records live longer; exact durations/deletion/export/legal-hold policy remains explicit configuration/governance work.
+- **Tool execution:** A initially → B later only if evaluation justifies it. No arbitrary repository shell/code execution in the first release. Future execution must be a separate isolated capability/service and cannot alter the specialist finding contract.
 
 ## Current gate
 
@@ -32,32 +39,23 @@ Completed or recommendation-ready:
 - GitHub App permission and webhook analysis: `docs/architecture/phase-1-github-boundary-analysis.md`
 - Review identity/installation/tenancy analysis: `docs/architecture/phase-1-identity-tenancy-analysis.md`
 - Retrieval/embedding benchmark contract: `docs/architecture/phase-1-retrieval-benchmark.md`
-- Autonomy policy alternatives: `docs/architecture/phase-1-autonomy-policy-analysis.md`
-- HITL role alternatives: `docs/architecture/phase-1-hitl-role-analysis.md`
-- Privacy/retention model: `docs/architecture/phase-1-privacy-retention-analysis.md`
+- Autonomy policy analysis: `docs/architecture/phase-1-autonomy-policy-analysis.md`
+- HITL role analysis: `docs/architecture/phase-1-hitl-role-analysis.md`
+- Privacy/retention analysis: `docs/architecture/phase-1-privacy-retention-analysis.md`
 - Managed AWS topology: `docs/architecture/phase-1-aws-topology-analysis.md`
-- Tool/sandbox execution boundary: `docs/architecture/phase-1-tool-sandbox-analysis.md`
+- Tool/sandbox analysis: `docs/architecture/phase-1-tool-sandbox-analysis.md`
 - Phase 1 bounded task map: `docs/architecture/phase-1-plan.md`
-- Decision queue synchronized with investigation status: `docs/architecture/decision-queue.md`
+- Decision queue: `docs/architecture/decision-queue.md`
+- Durable owner decisions: `docs/architecture/owner-decisions-2026-09-14.md`
 
-## Remaining owner decisions blocking affected architecture contracts
+## Remaining work before Phase 1 green gate
 
-1. TDEC-005 — choose autonomy policy Option A/B/C. Recommendation: A initially.
-2. TDEC-006 — choose HITL role Option A/B/C. Recommendation: A initially behind capability-based authorization.
-3. TDEC-007 — approve retention-class model and later choose exact durations/deletion-export commitments.
-4. TDEC-009 — choose tool/sandbox Option A/B/C. Recommendation: A initially (no arbitrary code execution).
-
-TDEC-008 remains a technical verification item; the leading AWS topology is documented but still requires final security/cost verification before production deployment is treated as fixed.
-
-## Next admissible work
-
-After the owner decisions above are resolved:
-
-1. finalize the affected Phase 1 architecture contracts;
-2. run full Genesis plan check and requirement traceability;
-3. perform independent Phase 1 review;
-4. obtain explicit Phase 1 green approval;
-5. only then activate the first bounded product implementation task.
+1. Complete final technical verification for GitHub permissions/webhooks, identity lifecycle, retrieval benchmark design, and AWS topology.
+2. Complete requirement traceability from FR/NFR/AC to architecture contracts and executable verification.
+3. Finalize the Phase 1 ADR set and architecture source-of-truth alignment.
+4. Run the Phase 1 independent review with current evidence.
+5. Obtain explicit Phase 1 human green approval.
+6. Only then activate the first bounded product implementation task.
 
 ## Cross-chat rule
 
@@ -76,8 +74,9 @@ First read and verify:
 5. docs/phase-0-independent-review.md
 6. docs/architecture/phase-1-plan.md
 7. docs/architecture/decision-queue.md
-8. applicable architecture/ADR files
-9. latest Git history on develop
+8. docs/architecture/owner-decisions-2026-09-14.md
+9. applicable architecture/ADR files
+10. latest Git history on develop
 
 Treat the repository as the durable source of truth, not previous chat memory.
 Verify the latest checkpoint against the current repository, identify the next admissible Genesis task, and continue exactly from there.
