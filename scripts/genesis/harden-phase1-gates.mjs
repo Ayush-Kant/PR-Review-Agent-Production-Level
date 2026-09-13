@@ -18,7 +18,8 @@ import { fileURLToPath } from 'node:url';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const projectPath = path.join(ROOT, '.genesis', 'project.json');
-const backupPath = path.join(ROOT, '.genesis', 'project.json.pre-gate-hardening.bak');
+const localDir = path.join(ROOT, '.genesis', 'local');
+const backupPath = path.join(localDir, 'project.json.pre-gate-hardening.bak');
 
 const project = JSON.parse(fs.readFileSync(projectPath, 'utf8'));
 const tasks = project.tasks ?? [];
@@ -32,6 +33,7 @@ for (const id of expected) {
 }
 
 const original = fs.readFileSync(projectPath, 'utf8');
+fs.mkdirSync(localDir, { recursive: true });
 if (!fs.existsSync(backupPath)) fs.writeFileSync(backupPath, original, 'utf8');
 
 for (const id of expected) {
