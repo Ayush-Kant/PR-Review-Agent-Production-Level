@@ -1,6 +1,6 @@
 # Architecture Decision Queue
 
-Status: ACTIVE — product-owner decisions DEC-001..DEC-012 have been selected; remaining items are technical decisions requiring investigation before affected implementation.
+Status: ACTIVE — product-owner decisions DEC-001..DEC-012 are selected. Phase 1 technical investigations are in progress; unresolved choices remain explicitly gated.
 
 This document prevents the coding agent from silently making product or architecture choices that materially affect review behavior, trust, cost, UX, or long-term system shape.
 
@@ -21,55 +21,57 @@ See `docs/architecture/owner-decisions-2026-09-14.md` for the full rationale and
 - DEC-011 GitHub App installation scope → **C**, fallback to simpler **B** if combined UX becomes disproportionate.
 - DEC-012 `pull_request.edited` behavior → **A**: do not automatically trigger a fresh full review for title/body-only edits; ingest metadata for context/history and allow explicit future re-review through policy if needed.
 
-## Remaining technical decisions
+## Technical investigations completed / recommendations ready
 
 ### TDEC-001 — Exact GitHub App permission set
 
-Need to determine the minimum repository/account permissions required for:
-- reading PRs/diffs/commits/contents;
-- publishing inline review comments;
-- publishing checks/summary if dual publication survives verification;
-- repository selection/installation state;
-- webhook delivery.
+**Investigation status: recommendation ready.** Proposed minimum repository permissions are Metadata: read, Contents: read, Pull requests: write, with Checks: write conditional on the final publication contract. No source-content write, administration, workflows, secrets, deployments, or security-alert write permissions are proposed for the initial review product.
 
-Rule: least privilege. Do not request broad permissions for future speculative features.
+Evidence and rationale are recorded in `docs/architecture/phase-1-github-boundary-analysis.md`.
 
 ### TDEC-002 — GitHub webhook event matrix
 
-Need to define exactly which events trigger work, which update an existing review, and which are ignored. Idempotency and review lifecycle semantics must be explicit. `pull_request.edited` default behavior is now owner-decided as no automatic fresh full review; exact ingestion/state-update semantics remain technical work.
+**Investigation status: recommendation ready.** Automatic review triggering remains centered on `pull_request`; human review/comment events are ingested as feedback rather than recursively creating reviews. `pull_request.edited` is explicitly decided as no automatic fresh review.
+
+Evidence and rationale are recorded in `docs/architecture/phase-1-github-boundary-analysis.md`.
 
 ### TDEC-003 — Review identity and tenant/install mapping
 
-Need to formalize the mapping:
-`GitHub delivery → App installation → repository → application tenant/user → logical review → workflow runs/passes`.
+**Investigation status: recommendation ready.** The authorization model separates GitHub App installation from application user identity and derives logical review identity from installation + repository + PR + review-relevant head/event state. Repository scope is never inferred from dashboard visibility.
+
+Detailed analysis is recorded in `docs/architecture/phase-1-identity-tenancy-analysis.md`.
 
 ### TDEC-004 — Embedding benchmark dataset and acceptance threshold
 
-Need to define the representative repository/query dataset, candidate models, metrics, cost/latency bounds, and decision threshold before choosing the concrete embedding model and vector dimension.
+**Investigation status: benchmark contract ready.** The benchmark will compare candidate retrieval approaches using representative target ecosystems, development/holdout separation, retrieval quality, latency, cost, storage impact, and vector-index compatibility. No vector dimension is frozen before model selection.
+
+Detailed benchmark contract is recorded in `docs/architecture/phase-1-retrieval-benchmark.md`.
+
+## Owner decision required before affected contract is final
 
 ### TDEC-005 — Exact autonomy policy schema
 
-Need to define the repository policy fields, defaults, allowed severity/confidence combinations, override authority, and audit semantics. LLM output cannot mutate policy.
+**Analysis complete; owner decision required.** Proposed default is Option A (conservative severity-first), with the policy engine designed to support later calibrated evidence+confidence routing. See `docs/architecture/phase-1-autonomy-policy-analysis.md`.
 
 ### TDEC-006 — HITL role matrix
 
-Need to define the minimum roles and permissions while retaining the pluggable RBAC boundary.
+**Analysis complete; owner decision required.** Proposed default is Option A (Reviewer + Repository administrator) behind an internal capability-based authorization interface. See `docs/architecture/phase-1-hitl-role-analysis.md`.
 
 ### TDEC-007 — Privacy and retention policy
 
-Need explicit retention/deletion rules for repository content, retrieved context, traces, findings, HITL decisions, and model/provider payloads.
+**Analysis complete; owner decision required.** Proposed direction is retention classes with minimal raw repository/model-payload retention and longer-lived normalized finding/HITL/audit records. Exact durations and deletion/export commitments remain owner decisions. See `docs/architecture/phase-1-privacy-retention-analysis.md`.
 
 ### TDEC-008 — Managed cloud topology
 
-Need to verify the first AWS deployment topology (for example ECS/Fargate + ALB + Secrets Manager + managed Redis-compatible queue + Tiger/Postgres-compatible durable spine) against security, networking, cost, and sandbox requirements.
+**Investigation status: recommendation ready pending final security/cost verification.** Leading candidate is ECS/Fargate + ALB + private networking + managed secrets + managed Redis-compatible queue + Tiger/Postgres durable spine. See `docs/architecture/phase-1-aws-topology-analysis.md`.
 
 ### TDEC-009 — Tool/sandbox execution policy
 
-Need to determine whether initial release requires code execution at all. If yes, define capability scopes, isolation, network policy, time/resource limits, credential boundaries, and evidence capture before implementation.
+**Analysis complete; owner decision required.** Proposed initial release is Option A: no arbitrary repository code execution; keep a capability boundary ready for a future isolated execution service if evaluation proves it necessary. See `docs/architecture/phase-1-tool-sandbox-analysis.md`.
 
 ## Decision protocol
 
-For every remaining technical decision, the coding agent must investigate and explain the problem, alternatives, consequences, and recommendation. Product-owner input is required whenever the choice changes product behavior, trust, cost, user workflow, or an irreversible architecture boundary.
+For every remaining technical decision, the coding agent investigates and explains the problem, alternatives, consequences, and recommendation. Product-owner input is required whenever the choice changes product behavior, trust, cost, user workflow, or an irreversible architecture boundary.
 
 ## Rule
 
