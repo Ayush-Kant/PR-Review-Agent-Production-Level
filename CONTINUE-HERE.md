@@ -1,6 +1,6 @@
 # Continue Here — PR Review Agent Production Level
 
-> Session handoff artifact. Canonical truth is `.genesis/project.json` plus approved specification/architecture artifacts, with Genesis contracts taking precedence.
+> Session handoff. Canonical truth is `.genesis/project.json` plus approved specification/architecture artifacts, with Genesis contracts taking precedence.
 
 Current repo: `Ayush-Kant/PR-Review-Agent-Production-Level`
 Active construction branch: `develop`
@@ -30,8 +30,6 @@ These decisions are now recorded canonically in `.genesis/project.json` as DEC-0
 - **Privacy:** C retention classes. Secrets never in application DB; execution context is ephemeral; evidence/payload retention is minimized; findings/HITL/audit records live longer; exact durations/deletion/export/legal-hold policy remains explicit configuration/governance work.
 - **Tool execution:** A initially → B later only if evaluation justifies it. No arbitrary repository shell/code execution in the first release. Future execution must be a separate isolated capability/service and cannot alter the specialist finding contract.
 
-See `docs/architecture/genesis-alignment-2026-09-14.md` and `docs/architecture/genesis-plan-preflight-2026-09-14.md` for the reconciliation and preflight evidence.
-
 ## Current gate
 
 **Production application/agent implementation is still blocked.** Phase 0 is approved in canonical Genesis state. Phase 1 remains in planning until the current canonical requirement-linked plan passes the actual Genesis plan check, receives the required independent review, and is explicitly approved.
@@ -43,35 +41,45 @@ Canonical current state:
 - `workflow.plan_check`: null
 - `workflow.plan_approval`: null
 
-## Phase 1 progress
+## Phase 1 work completed
 
-Completed or recommendation-ready:
+### Genesis governance
 
-- GitHub App permission and webhook analysis: `docs/architecture/phase-1-github-boundary-analysis.md`
-- Review identity/installation/tenancy analysis: `docs/architecture/phase-1-identity-tenancy-analysis.md`
+- Canonicalized DEC-013 through DEC-016 into `.genesis/project.json`.
+- Corrected P1-19 so it has both an executable proof gate and the mandatory independent-review gate required for high-risk work.
+- Recorded the source-level Genesis plan preflight and the environment limitation preventing an official CLI execution receipt.
+- Preserved the planning gate; no false `plan_check` or `plan_approval` was recorded.
+
+### Architecture verification and contracts
+
+- GitHub App boundary and least-privilege posture: `docs/architecture/phase-1-github-boundary-analysis.md`
+- Identity/installation/tenancy lifecycle: `docs/architecture/phase-1-identity-tenancy-analysis.md`
 - Retrieval/embedding benchmark contract: `docs/architecture/phase-1-retrieval-benchmark.md`
-- Autonomy policy analysis: `docs/architecture/phase-1-autonomy-policy-analysis.md`
-- HITL role analysis: `docs/architecture/phase-1-hitl-role-analysis.md`
-- Privacy/retention analysis: `docs/architecture/phase-1-privacy-retention-analysis.md`
-- Managed AWS topology: `docs/architecture/phase-1-aws-topology-analysis.md`
-- Tool/sandbox analysis: `docs/architecture/phase-1-tool-sandbox-analysis.md`
-- Phase 1 bounded task map: `docs/architecture/phase-1-plan.md`
-- Decision queue: `docs/architecture/decision-queue.md`
-- Owner decision record: `docs/architecture/owner-decisions-2026-09-14.md`
-- Genesis authority reconciliation: `docs/architecture/genesis-alignment-2026-09-14.md`
+- Autonomy policy: `docs/architecture/phase-1-autonomy-policy-analysis.md`
+- HITL roles: `docs/architecture/phase-1-hitl-role-analysis.md`
+- Privacy/retention: `docs/architecture/phase-1-privacy-retention-analysis.md`
+- AWS topology: `docs/architecture/phase-1-aws-topology-analysis.md`
+- Tool/sandbox boundary: `docs/architecture/phase-1-tool-sandbox-analysis.md`
+- Technical verification package: `docs/architecture/phase-1-technical-verification.md`
+- Architecture contracts: `docs/architecture/phase-1-contracts.md`
+- Requirement traceability: `docs/architecture/phase-1-requirement-traceability.md`
+- Phase 1 ADR index: `docs/architecture/adr-index.md`
+- Evaluation contract: `docs/evaluation/phase-1-evaluation-contract.md`
+- Genesis reconciliation: `docs/architecture/genesis-alignment-2026-09-14.md`
 - Genesis plan preflight: `docs/architecture/genesis-plan-preflight-2026-09-14.md`
+
+### External verification incorporated
+
+Current GitHub documentation supports the minimum-permission App boundary, webhook secret/signature validation, and Pull requests write for creating reviews. Current AWS documentation supports Fargate as a managed container option, Secrets Manager integration for ECS, and separate task-execution/application roles.
 
 ## Remaining work before Phase 1 green gate
 
 1. Run the official Genesis plan check against the current canonical ledger.
-2. If the check reports any contradiction, fix the canonical ledger and rerun it; never bypass the failure through sidecar documents.
+2. If it reports any contradiction, fix the canonical ledger and rerun it; never bypass failures through sidecar documents.
 3. Regenerate/verify the Genesis planning view from canonical state.
-4. Complete final technical verification for GitHub permissions/webhooks, identity lifecycle, retrieval benchmark design, and AWS topology.
-5. Complete requirement traceability from FR/NFR/AC to architecture contracts and executable verification.
-6. Finalize the Phase 1 ADR set and architecture source-of-truth alignment.
-7. Run the Phase 1 independent review with current evidence.
-8. Obtain explicit Phase 1 human green approval through Genesis.
-9. Only then activate the first bounded product implementation task.
+4. Run the Phase 1 independent review with the current architecture/evaluation evidence.
+5. Obtain explicit Phase 1 human green approval through Genesis.
+6. Only then activate the first bounded product implementation task.
 
 ## Cross-chat rule
 
@@ -93,8 +101,12 @@ First read and verify:
 8. docs/architecture/owner-decisions-2026-09-14.md
 9. docs/architecture/genesis-alignment-2026-09-14.md
 10. docs/architecture/genesis-plan-preflight-2026-09-14.md
-11. applicable architecture/ADR files
-12. latest Git history on develop
+11. docs/architecture/phase-1-technical-verification.md
+12. docs/architecture/phase-1-contracts.md
+13. docs/architecture/phase-1-requirement-traceability.md
+14. docs/evaluation/phase-1-evaluation-contract.md
+15. applicable ADR files
+16. latest Git history on develop
 
 Treat the repository as the durable source of truth, not previous chat memory. Genesis contracts and `.genesis/project.json` outrank sidecar architecture notes.
 Verify the latest checkpoint against the current repository, identify the next admissible Genesis action, and continue exactly from there.
