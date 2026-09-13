@@ -1,143 +1,75 @@
 # Architecture Decision Queue
 
-Status: OPEN — product-owner decisions required before the affected implementation tasks are authorized.
+Status: ACTIVE — product-owner decisions DEC-001..DEC-011 have been selected; remaining items are technical decisions requiring investigation before affected implementation.
 
-This document exists to prevent the coding agent from silently making product or architecture choices that materially affect review behavior, trust, cost, UX, or long-term system shape.
+This document prevents the coding agent from silently making product or architecture choices that materially affect review behavior, trust, cost, UX, or long-term system shape.
+
+## Closed owner decisions
+
+See `docs/architecture/owner-decisions-2026-09-14.md` for the full rationale and implementation consequences.
+
+- DEC-001 LLM/model provider strategy → **C**: provider-neutral interface, one initial provider/model.
+- DEC-002 Embedding strategy → **B**: benchmark retrieval candidates; derive/freeze dimension after selection.
+- DEC-003 Publication surface → **C**, conditional on reliable dual publication; otherwise **A**.
+- DEC-004 Language support → **targeted Python + JavaScript + TypeScript + Java/Spring Boot** for AI/ML and MERN/PERN/modern JS/TS workloads.
+- DEC-005 HITL identity/roles → **C**: GitHub identity with pluggable application RBAC.
+- DEC-006 Autonomy → **C**: per-repository policy with conservative defaults.
+- DEC-007 Frontend timing → **C**: minimal, capability-driven frontend.
+- DEC-008 Customer infrastructure model → **cloud SaaS via GitHub App**; no customer-side infrastructure.
+- DEC-009 Large PR handling → **B + human intervention**; staged/multi-pass with explicit scope.
+- DEC-010 Deployment → **B**: managed containers; AWS is an approved candidate, including ECS/Fargate.
+- DEC-011 GitHub App installation scope → **C**, fallback to simpler **B** if combined UX becomes disproportionate.
+
+## Remaining technical decisions
+
+### TDEC-001 — Exact GitHub App permission set
+
+Need to determine the minimum repository/account permissions required for:
+- reading PRs/diffs/commits/contents;
+- publishing inline review comments;
+- publishing checks/summary if dual publication survives verification;
+- repository selection/installation state;
+- webhook delivery.
+
+Rule: least privilege. Do not request broad permissions for future speculative features.
+
+### TDEC-002 — GitHub webhook event matrix
+
+Need to define exactly which events trigger work, which update an existing review, and which are ignored. Idempotency and review lifecycle semantics must be explicit.
+
+### TDEC-003 — Review identity and tenant/install mapping
+
+Need to formalize the mapping:
+`GitHub delivery → App installation → repository → application tenant/user → logical review → workflow runs/passes`.
+
+### TDEC-004 — Embedding benchmark dataset and acceptance threshold
+
+Need to define the representative repository/query dataset, candidate models, metrics, cost/latency bounds, and decision threshold before choosing the concrete embedding model and vector dimension.
+
+### TDEC-005 — Exact autonomy policy schema
+
+Need to define the repository policy fields, defaults, allowed severity/confidence combinations, override authority, and audit semantics. LLM output cannot mutate policy.
+
+### TDEC-006 — HITL role matrix
+
+Need to define the minimum roles and permissions while retaining the pluggable RBAC boundary.
+
+### TDEC-007 — Privacy and retention policy
+
+Need explicit retention/deletion rules for repository content, retrieved context, traces, findings, HITL decisions, and model/provider payloads.
+
+### TDEC-008 — Managed cloud topology
+
+Need to verify the first AWS deployment topology (for example ECS/Fargate + ALB + Secrets Manager + managed Redis-compatible queue + Tiger/Postgres-compatible durable spine) against security, networking, cost, and sandbox requirements.
+
+### TDEC-009 — Tool/sandbox execution policy
+
+Need to determine whether initial release requires code execution at all. If yes, define capability scopes, isolation, network policy, time/resource limits, credential boundaries, and evidence capture before implementation.
 
 ## Decision protocol
 
-For each item, the agent must explain the problem, concrete options, consequences, and recommendation. The product owner chooses. The choice is then recorded as an ADR and reflected in canonical Genesis state before implementation.
-
-## DEC-001 — LLM/model provider strategy
-
-Problem: model choice affects review quality, latency, cost, privacy, structured-output behavior, and provider failure modes.
-
-Options:
-- A: one primary provider/model with a deterministic fallback model.
-- B: multi-provider routing from day one.
-- C: provider-neutral abstraction first, with one configured provider initially.
-
-Current recommendation: C. Keep provider selection behind the model-router boundary, start with one evaluated provider/model, and only add multi-provider routing when evidence justifies it.
-
-Owner decision: OPEN.
-
-## DEC-002 — Embedding provider/model
-
-Problem: embeddings determine retrieval quality, dimensions, cost, data movement, and the final Tiger schema.
-
-Options:
-- A: follow the planning document exactly and use the proposed OpenAI embedding path/dimension after compatibility verification.
-- B: select the best current embedding model after a small retrieval benchmark.
-- C: use a local/self-hosted embedding model for privacy/cost reasons.
-
-Current recommendation: B. Benchmark retrieval quality before freezing the schema, while preserving the memory interface.
-
-Owner decision: OPEN.
-
-## DEC-003 — Initial GitHub publication surface
-
-Problem: publication behavior determines user trust and required GitHub permissions.
-
-Options:
-- A: inline review comments + review summary.
-- B: check run annotations + summary, with inline comments only for high-confidence findings.
-- C: both inline review and check run from the beginning.
-
-Current recommendation: A for the first user-facing release unless evaluation shows comments are too noisy; keep the integration boundary capable of supporting additional surfaces later.
-
-Owner decision: OPEN.
-
-## DEC-004 — Initial language support
-
-Problem: parser/retrieval coverage determines what repositories can be reviewed reliably.
-
-Options:
-- A: start with a narrow evaluated set (for example Python + JS/TS) and explicitly degrade for others.
-- B: support many languages immediately using parser adapters.
-- C: choose languages from a target-repository dataset before implementation.
-
-Current recommendation: C, then implement the smallest set justified by the dataset/evaluation plan.
-
-Owner decision: OPEN.
-
-## DEC-005 — HITL authentication/roles
-
-Problem: human approval is a privileged decision surface and must have explicit identity and authorization.
-
-Options:
-- A: GitHub OAuth/app identity only.
-- B: application-authenticated dashboard with its own RBAC.
-- C: GitHub identity first, with a pluggable application RBAC layer.
-
-Current recommendation: C.
-
-Owner decision: OPEN.
-
-## DEC-006 — Production autonomy at launch
-
-Problem: automatic publication creates reputational and correctness consequences.
-
-Options:
-- A: all findings require human approval initially.
-- B: high-confidence, non-critical findings auto-publish; exceptions go to HITL.
-- C: configurable per-repository autonomy policy, defaulting conservatively.
-
-Current recommendation: C, with the global default initially behaving like B or stricter until measured trust is earned.
-
-Owner decision: OPEN.
-
-## DEC-007 — Frontend timing
-
-Problem: the architecture includes a dashboard/HITL/trace/economics surface, but building it too early can lock API contracts prematurely.
-
-Options:
-- A: build the dashboard shell early as Phase 2 specifies.
-- B: design API contracts first, then build frontend against stable contracts.
-- C: build a minimal operational/HITL UI early, expand later.
-
-Current recommendation: C, provided the UI consumes stable contracts and does not become an alternate source of truth.
-
-Owner decision: OPEN.
-
-## DEC-008 — Local developer infrastructure
-
-Problem: Tiger Cloud, Redis, model providers, and GitHub integration affect how much of the stack runs locally.
-
-Options:
-- A: cloud-first dependencies for developer environments.
-- B: local Docker substitutes where practical, cloud services for production parity.
-- C: fully local stack where possible, with cloud only for external integrations.
-
-Current recommendation: B. Keep local development repeatable while preserving a production-parity integration path.
-
-Owner decision: OPEN.
-
-## DEC-009 — Initial repository/review size limits
-
-Problem: bounded context and cost require explicit limits for large PRs/repositories.
-
-Options:
-- A: hard reject above fixed limits.
-- B: staged/degraded review with explicit limitations.
-- C: queue large reviews for human approval before execution.
-
-Current recommendation: B. Prefer reduced-scope but honest review over silent truncation or fabricated certainty.
-
-Owner decision: OPEN.
-
-## DEC-010 — Deployment target
-
-Problem: deployment choices affect secrets, networking, observability, Redis, Tiger connectivity, sandboxing, and operational complexity.
-
-Options:
-- A: Render/Vercel style managed deployment as a first release.
-- B: containerized deployment with managed compute/container platform.
-- C: Kubernetes from the start.
-
-Current recommendation: B unless the target workload or sandbox requirements demonstrate that C is justified.
-
-Owner decision: OPEN.
+For every remaining technical decision, the coding agent must investigate and explain the problem, alternatives, consequences, and recommendation. Product-owner input is required whenever the choice changes product behavior, trust, cost, user workflow, or an irreversible architecture boundary.
 
 ## Rule
 
-No implementation task may silently convert an OPEN decision into an irreversible architecture choice. Where implementation needs a temporary seam, use an explicit interface/configuration boundary and record the temporary assumption.
+No implementation task may silently convert an unresolved decision into an irreversible architecture choice. Where temporary implementation work is necessary, use an explicit interface/configuration seam and record the temporary assumption.
