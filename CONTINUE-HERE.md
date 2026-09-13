@@ -1,74 +1,51 @@
 # Continue Here — PR Review Agent Production Level
 
-> This is a **session handoff**, not the canonical source of truth. Canonical project truth is `.genesis/project.json` plus approved specification/architecture artifacts.
+> Session handoff artifact. Canonical truth is `.genesis/project.json` plus approved specification/architecture artifacts.
 
-## Current project
-
-Repository: `Ayush-Kant/PR-Review-Agent-Production-Level`
-
+Current repo: `Ayush-Kant/PR-Review-Agent-Production-Level`
 Active construction branch: `develop`
 Production-intent branch: `main`
 
-Genesis protocol is mandatory. Product implementation is blocked until the required Phase 0 and Phase 1 gates are satisfied.
+## Owner decisions
 
-## Product direction decided by owner
+- LLM: provider-neutral interface + one evaluated provider/model initially.
+- Embeddings: benchmark retrieval first; derive/freeze vector dimension only after model selection and compatibility verification.
+- Publication: design for inline review + summary/check; if dual publication cannot be made reliable without unjustified complexity, ship inline review + summary only.
+- Languages: Python, JavaScript, TypeScript, Java, Spring Boot, focused on AI/ML and MERN/PERN/modern JS/TS workloads.
+- HITL: GitHub identity + pluggable application RBAC.
+- Autonomy: per-repository configurable policy, conservative by default.
+- Frontend: minimal/capability-driven.
+- Customer experience: hosted cloud SaaS via GitHub App; no customer-side runtime infrastructure.
+- Large PRs: staged/degraded multi-pass review with explicit limitations + human intervention.
+- Deployment: managed containers; AWS ECS/Fargate is an approved candidate.
+- GitHub App installation scope: C, with fallback to simpler B if complexity becomes disproportionate.
 
-1. **LLM strategy:** provider-neutral model interface; one evaluated provider/model initially.
-2. **Embeddings:** benchmark retrieval candidates first. Freeze the model and vector dimension only after benchmark + compatibility verification.
-3. **GitHub publication:** design for both inline review and a summary/check surface; if dual publication cannot be made reliable without unjustified complexity, release with inline review + summary only.
-4. **Languages:** Python, JavaScript, TypeScript, Java, Spring Boot, with focus on AI/ML and MERN/PERN/modern JS/TS workloads.
-5. **HITL auth:** GitHub identity first with a pluggable application RBAC layer; preserve an easy path for a simpler GitHub-only mode.
-6. **Autonomy:** configurable per repository, conservative by default; critical/low-confidence/disputed/policy-sensitive cases remain eligible for human escalation.
-7. **Frontend:** minimal and capability-driven; no speculative dashboard work.
-8. **Customer deployment model:** cloud SaaS via GitHub App. Customers install/authorize the App and use the browser; they do not install our runtime, Redis, database, or workers.
-9. **Large PRs:** staged/degraded review with explicit limitations and optional human-directed multi-pass review. One logical review identity spans the passes.
-10. **Deployment:** managed containers are preferred; AWS ECS/Fargate is an approved target subject to architecture/security/cost verification.
-11. **GitHub App installation scope:** both user/repository-oriented and organization/account-oriented onboarding where practical; fall back to the simpler broader-installation model if the combined experience becomes disproportionately complex.
+## Current gate
 
-## Important architecture rules
+**Production application/agent implementation is still blocked.** Genesis requires Phase 0 independent review + human approval before Phase 1 becomes green, and Phase 1 must be green before product implementation starts.
 
-- Specialists produce evidence-backed findings; they do not publish directly.
-- Aggregation, normalization, deduplication, confidence and policy gating happen before publication.
-- LLM confidence is a routing signal, not proof of truth.
-- Repository content, PR text, retrieved context, tool output and model output are untrusted data unless an explicit trusted boundary says otherwise.
-- Privileged actions require explicit authorization, least privilege and durable attribution.
-- Budget checks occur before expensive model work where technically possible.
-- Evaluation artifacts and evaluators must be protected from the candidate system.
-- Slower-but-correct is preferred over fast-but-unjustified.
-- No architecture/product decision may be silently changed by the coding agent.
+## Work completed in this session
 
-## Current implementation boundary
+- Recorded owner decisions in `docs/architecture/owner-decisions-2026-09-14.md`.
+- Updated `docs/architecture/decision-queue.md` with closed owner decisions and remaining technical decisions.
+- Refined `docs/architecture/phase-1-proposal.md` for the cloud GitHub-App SaaS model, installation/tenant boundaries, large-PR passes, retrieval benchmark, and managed deployment.
+- Added this handoff protocol.
+- Synchronized `.genesis/project.json` in commit `81f64f6f3ed09e1338429a1a999bf9c950721d07`.
 
-**Do not start production agent/application implementation yet.**
+## Next admissible work
 
-The repository is still in the Genesis planning/specification gate. The current Phase 0 task must reach independent review and human approval before Phase 1 implementation-ready architecture work can become green.
+1. Verify `develop` points at the Genesis synchronization checkpoint.
+2. Perform Phase 0 verification/independent review.
+3. Resolve only the remaining technical decisions listed in `docs/architecture/decision-queue.md` as required for Phase 1.
+4. Obtain human Phase 0 approval.
+5. Run Phase 1 independent review and green gate.
+6. Then begin bounded product implementation tasks.
 
-Current expected next work:
+## Cross-chat rule
 
-1. Make the canonical `.genesis/project.json` reflect the owner decisions and continuity policy.
-2. Update the decision queue/ADR index so closed decisions are clearly distinguished from unresolved technical decisions.
-3. Refine the Phase 1 architecture for the cloud GitHub-App SaaS model, including tenancy, installation identity, user identity, repository scope, webhook flow, publication adapters, and managed deployment boundaries.
-4. Define the retrieval benchmark plan that will select the embedding model and only then freeze the vector dimension/schema.
-5. Complete remaining Phase 0 open questions and verification criteria.
-6. Run the required independent Phase 0 review.
-7. Obtain human Phase 0 approval.
-8. Proceed to Phase 1 architecture verification and green gate.
-9. Only after those gates, begin bounded product implementation tasks.
+When this chat approaches its practical context boundary, the coding agent must checkpoint before continuity is lost, tell the product owner to start a new chat, and provide a copy-paste resume prompt.
 
-## Last verified repository checkpoint
-
-The latest durable owner-decision checkpoint is the commit that adds:
-
-- `docs/architecture/owner-decisions-2026-09-14.md`
-- this handoff file
-
-Before continuing, verify the current `develop` HEAD and confirm these files still exist.
-
-## Cross-chat continuity protocol
-
-When the current chat approaches its practical context boundary, the coding agent must **stop before losing continuity**, checkpoint the project to the repository, and tell the product owner to start a new chat.
-
-The agent must then provide a copy-paste continuation prompt similar to:
+Resume prompt:
 
 ```text
 Continue the PR-Review-Agent-Production-Level project as my coding agent.
@@ -78,24 +55,13 @@ First read and verify:
 2. .genesis/project.json
 3. SPEC.md
 4. docs/phase-0.md
-5. the applicable architecture/ADR files
-6. the latest Git history on develop
+5. applicable architecture/ADR files
+6. latest Git history on develop
 
-Treat the repository as the durable source of truth, not the previous chat memory.
-Verify the last checkpoint against the current repository state, identify the next admissible Genesis task, and continue from exactly that point.
+Treat the repository as the durable source of truth, not previous chat memory.
+Verify the latest checkpoint against the current repository, identify the next admissible Genesis task, and continue exactly from there.
 Do not repeat completed discovery, do not silently change product-owner decisions, and do not begin gated product implementation before the required Genesis approvals are present.
-If any contradiction exists between the handoff and canonical Genesis state, stop and reconcile it from the higher-priority source rather than guessing.
+If any contradiction exists between handoff and canonical Genesis state, reconcile it from the higher-priority source rather than guessing.
 ```
 
-### Handoff requirements
-
-Before handing off:
-- durable decisions must be in repository artifacts;
-- current Genesis state must be valid and current;
-- the active task and blocker/next action must be explicit;
-- any unfinished work must have a bounded next action;
-- no important product choice should exist only in chat.
-
-### Fresh-session startup rule
-
-A new session should be able to recover the project from the repository without asking the product owner to reconstruct the whole history from memory.
+Before handoff, ensure durable decisions, active task, blocker, next action, and unfinished work are represented in the repository.
