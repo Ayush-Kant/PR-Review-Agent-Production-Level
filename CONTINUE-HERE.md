@@ -30,8 +30,7 @@ Production-intent branch: `main`
 - Updated `docs/architecture/decision-queue.md` with closed owner decisions and remaining technical decisions.
 - Refined `docs/architecture/phase-1-proposal.md` for the cloud GitHub-App SaaS model, installation/tenant boundaries, large-PR passes, retrieval benchmark, and managed deployment.
 - Added and persisted this handoff protocol.
-- Synchronized `.genesis/project.json` in commit `81f64f6f3ed09e1338429a1a999bf9c950721d07`.
-- Final verified `develop` HEAD for this checkpoint: `114a94674e611a06eed0f65da3c2afbcf1bbacb2`.
+- Synchronized `.genesis/project.json` with the owner decisions, SaaS/cloud constraints, new invariants, and continuity rule.
 
 ## Next admissible work
 
