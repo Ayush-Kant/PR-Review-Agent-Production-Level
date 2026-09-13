@@ -61,10 +61,11 @@ Canonical current state:
 - AWS topology: `docs/architecture/phase-1-aws-topology-analysis.md`
 - Tool/sandbox boundary: `docs/architecture/phase-1-tool-sandbox-analysis.md`
 - Technical verification package: `docs/architecture/phase-1-technical-verification.md`
-- Architecture contracts: `docs/architecture/phase-1-contracts.md`
+- Architecture contracts, including concurrency, publication reconciliation, and snapshot consistency: `docs/architecture/phase-1-contracts.md`
 - Requirement traceability: `docs/architecture/phase-1-requirement-traceability.md`
 - Phase 1 ADR index: `docs/architecture/adr-index.md`
 - Evaluation contract: `docs/evaluation/phase-1-evaluation-contract.md`
+- Adversarial independent pre-review: `docs/architecture/phase-1-independent-review.md`
 - Genesis reconciliation: `docs/architecture/genesis-alignment-2026-09-14.md`
 - Genesis plan preflight: `docs/architecture/genesis-plan-preflight-2026-09-14.md`
 
@@ -72,14 +73,26 @@ Canonical current state:
 
 Current GitHub documentation supports the minimum-permission App boundary, webhook secret/signature validation, and Pull requests write for creating reviews. Current AWS documentation supports Fargate as a managed container option, Secrets Manager integration for ECS, and separate task-execution/application roles.
 
+## Adversarial review findings still open
+
+- Official Genesis CLI plan-check receipt is missing because shell network access is unavailable in this environment.
+- Several current executable planning gates are structurally valid but shallow; stronger assertion-rich verification should replace string-presence checks before implementation.
+- Implementation must enforce head-generation concurrency checks before aggregation and publication.
+- Publication needs reconciliation for timeout-after-send/uncertain-side-effect cases.
+- Retrieval evidence must be snapshot-consistent with the reviewed head and index version.
+- Exact retention/deletion/export/legal-hold behavior remains future governance/configuration work.
+
+These are captured in `docs/architecture/phase-1-independent-review.md`. That document is a coding-agent pre-review, not a human Genesis independent-review approval.
+
 ## Remaining work before Phase 1 green gate
 
 1. Run the official Genesis plan check against the current canonical ledger.
-2. If it reports any contradiction, fix the canonical ledger and rerun it; never bypass failures through sidecar documents.
-3. Regenerate/verify the Genesis planning view from canonical state.
-4. Run the Phase 1 independent review with the current architecture/evaluation evidence.
-5. Obtain explicit Phase 1 human green approval through Genesis.
-6. Only then activate the first bounded product implementation task.
+2. Resolve any plan-check failures in the canonical ledger only.
+3. Replace weak architecture proof gates with meaningful bounded verification where practical.
+4. Regenerate/verify the Genesis planning view from canonical state.
+5. Run the human independent Phase 1 review against the current evidence.
+6. Obtain explicit Phase 1 human green approval through Genesis.
+7. Only then activate the first bounded product implementation task.
 
 ## Cross-chat rule
 
@@ -105,8 +118,9 @@ First read and verify:
 12. docs/architecture/phase-1-contracts.md
 13. docs/architecture/phase-1-requirement-traceability.md
 14. docs/evaluation/phase-1-evaluation-contract.md
-15. applicable ADR files
-16. latest Git history on develop
+15. docs/architecture/phase-1-independent-review.md
+16. applicable ADR files
+17. latest Git history on develop
 
 Treat the repository as the durable source of truth, not previous chat memory. Genesis contracts and `.genesis/project.json` outrank sidecar architecture notes.
 Verify the latest checkpoint against the current repository, identify the next admissible Genesis action, and continue exactly from there.
