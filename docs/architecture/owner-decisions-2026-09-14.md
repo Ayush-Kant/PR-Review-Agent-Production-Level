@@ -103,6 +103,15 @@ Implementation consequence:
 - Design tenancy/authorization boundaries so repository access is never inferred from dashboard visibility alone.
 - Organization-level controls must not weaken least privilege.
 
+### DEC-012 — PR description/title edits
+Decision: **A** — do **not** automatically trigger a fresh full review for `pull_request.edited`.
+
+Implementation consequence:
+- Title/body-only edits do not start a new specialist review run by default.
+- The latest title/body must still be available as review context for the next code-triggered run.
+- `pull_request.edited` may be ingested for durable metadata/history, HITL context, or a future explicit policy-controlled re-review operation.
+- This avoids expensive review churn while preserving the information for the next relevant review.
+
 ## Cross-cutting product direction
 
 The product is a hosted GitHub-native service, not a local developer tool. The intended end-user experience is:
