@@ -23,18 +23,18 @@ Production-intent branch: `main`
 
 ## Phase 1 owner decisions
 
-The following decisions were selected by the product owner and are recorded in the architecture decision artifacts. Their substance is compatible with Genesis, but they are **not yet canonical Genesis decisions** because the current `.genesis/project.json` has not been synchronized with them.
+These decisions are now recorded canonically in `.genesis/project.json` as DEC-013 through DEC-016. Architecture decision documents remain supporting rationale and evidence, not a competing source of truth.
 
 - **Autonomy:** A initially → evolve toward B when evaluation earns it. Critical never auto-publishes; high goes to HITL during initial calibration; medium/low require evidence completeness, freshness, provenance, and calibrated confidence. Repository policy may tighten but not weaken global safety invariants.
 - **HITL roles:** A externally + C internally. Customer UX starts with Reviewer and Repository administrator; internal authorization is capability-based so enterprise roles can be added later without changing review/domain models.
 - **Privacy:** C retention classes. Secrets never in application DB; execution context is ephemeral; evidence/payload retention is minimized; findings/HITL/audit records live longer; exact durations/deletion/export/legal-hold policy remains explicit configuration/governance work.
 - **Tool execution:** A initially → B later only if evaluation justifies it. No arbitrary repository shell/code execution in the first release. Future execution must be a separate isolated capability/service and cannot alter the specialist finding contract.
 
-See `docs/architecture/genesis-alignment-2026-09-14.md` for the reconciliation and authority rules.
+See `docs/architecture/genesis-alignment-2026-09-14.md` and `docs/architecture/genesis-plan-preflight-2026-09-14.md` for the reconciliation and preflight evidence.
 
 ## Current gate
 
-**Production application/agent implementation is still blocked.** Phase 0 is approved in canonical Genesis state. Phase 1 remains in planning until the requirement-linked plan passes the actual Genesis plan-check contract, receives the required independent review, and is explicitly approved.
+**Production application/agent implementation is still blocked.** Phase 0 is approved in canonical Genesis state. Phase 1 remains in planning until the current canonical requirement-linked plan passes the actual Genesis plan check, receives the required independent review, and is explicitly approved.
 
 Canonical current state:
 
@@ -59,12 +59,13 @@ Completed or recommendation-ready:
 - Decision queue: `docs/architecture/decision-queue.md`
 - Owner decision record: `docs/architecture/owner-decisions-2026-09-14.md`
 - Genesis authority reconciliation: `docs/architecture/genesis-alignment-2026-09-14.md`
+- Genesis plan preflight: `docs/architecture/genesis-plan-preflight-2026-09-14.md`
 
 ## Remaining work before Phase 1 green gate
 
-1. Canonically reconcile the selected Phase 1 decisions into `.genesis/project.json` through the Genesis workflow.
-2. Validate every Phase 1 task against Genesis rules: known requirement IDs, complete requirement coverage, executable proof gates, scenario validity, dependency validity, and independent review requirements.
-3. Regenerate/verify the Genesis planning view from canonical state and ensure no sidecar document is being treated as authority.
+1. Run the official Genesis plan check against the current canonical ledger.
+2. If the check reports any contradiction, fix the canonical ledger and rerun it; never bypass the failure through sidecar documents.
+3. Regenerate/verify the Genesis planning view from canonical state.
 4. Complete final technical verification for GitHub permissions/webhooks, identity lifecycle, retrieval benchmark design, and AWS topology.
 5. Complete requirement traceability from FR/NFR/AC to architecture contracts and executable verification.
 6. Finalize the Phase 1 ADR set and architecture source-of-truth alignment.
@@ -91,11 +92,12 @@ First read and verify:
 7. docs/architecture/decision-queue.md
 8. docs/architecture/owner-decisions-2026-09-14.md
 9. docs/architecture/genesis-alignment-2026-09-14.md
-10. applicable architecture/ADR files
-11. latest Git history on develop
+10. docs/architecture/genesis-plan-preflight-2026-09-14.md
+11. applicable architecture/ADR files
+12. latest Git history on develop
 
 Treat the repository as the durable source of truth, not previous chat memory. Genesis contracts and `.genesis/project.json` outrank sidecar architecture notes.
-Verify the latest checkpoint against the current repository, identify the next admissible Genesis task, and continue exactly from there.
+Verify the latest checkpoint against the current repository, identify the next admissible Genesis action, and continue exactly from there.
 Do not repeat completed discovery, do not silently change product-owner decisions, and do not begin gated product implementation before the required Genesis approvals are present.
 If any contradiction exists between handoff, architecture documents, and canonical Genesis state, reconcile it from the higher-priority source rather than guessing.
 ```
