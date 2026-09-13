@@ -2,8 +2,6 @@
 
 Status: DECIDED by product owner. Affected implementation remains gated by Genesis Phase 0/Phase 1 approval.
 
-## Decisions
-
 ### DEC-001 — LLM/model provider strategy
 Decision: **C** — provider-neutral model interface with one configured provider initially.
 
@@ -35,11 +33,6 @@ Implementation consequence:
 ### DEC-004 — Initial language support
 Decision: targeted support for **Python, JavaScript, TypeScript, Java, and Spring Boot**, optimized for AI/ML and MERN/PERN/modern JS/TS workloads.
 
-Implementation consequence:
-- Initial parser/retrieval/evaluation work prioritizes these ecosystems.
-- Unsupported languages must degrade honestly and must never be implied to have equivalent review coverage.
-- Do not add broad language support merely for feature-count purposes.
-
 ### DEC-005 — HITL authentication/roles
 Decision: **C** — GitHub identity first with a pluggable application RBAC layer, designed so a simpler GitHub-only authorization mode can be integrated easily.
 
@@ -62,46 +55,17 @@ Implementation consequence:
 ### DEC-007 — Frontend timing
 Decision: **C** — minimal operational/HITL frontend built only when the underlying capability requires it.
 
-Implementation consequence:
-- Avoid speculative dashboard work.
-- Frontend consumes backend contracts and durable system truth; it is never an alternate source of authoritative state.
-- Build login, repository connection, review state, finding review, and HITL surfaces only as those workflows become implementation-ready.
-
 ### DEC-008 — End-user infrastructure model
 Decision: **Cloud SaaS / GitHub App**. End users do not install Redis, databases, agents, runtimes, or local infrastructure.
-
-Implementation consequence:
-- User flow is browser login → GitHub App installation/authorization → repository selection → cloud review.
-- Production review execution occurs in our managed cloud environment.
-- Local Docker/development substitutes are engineering conveniences for maintainers, not customer requirements.
-- Exact production provider remains an implementation/deployment concern; AWS managed containers are an approved target under DEC-010.
 
 ### DEC-009 — Large PR handling
 Decision: **B + human intervention** — staged/degraded review with explicit limitations, including human-directed multi-pass review for unusually large PRs.
 
-Implementation consequence:
-- Normal PRs should follow the standard single review workflow.
-- Large PRs may be split into bounded review passes while retaining one logical review identity.
-- The system must expose what was and was not analyzed.
-- The system must never silently truncate a large review and report an unjustifiably complete result.
-- Human intervention may choose reduced-scope, risk-focused, or additional passes.
-
 ### DEC-010 — Deployment target
 Decision: **B**, with **AWS** explicitly considered an appropriate managed-container target.
 
-Implementation consequence:
-- Prefer containerized services on managed compute rather than Kubernetes from day one.
-- AWS ECS/Fargate is an acceptable initial production deployment target, subject to Phase 1 security/networking/cost verification.
-- Keep deployment concerns behind infrastructure/configuration boundaries so another managed container platform remains possible.
-
 ### DEC-011 — GitHub App installation scope
 Decision: **C** — support both individual/repository-oriented onboarding and organization/account-level installation where practical; if the combined experience becomes disproportionately complex, simplify to **B** (broader account-level installation with repository controls).
-
-Implementation consequence:
-- Model GitHub App installation separately from application user identity.
-- Support selected-repository installation where the GitHub installation flow permits it.
-- Design tenancy/authorization boundaries so repository access is never inferred from dashboard visibility alone.
-- Organization-level controls must not weaken least privilege.
 
 ### DEC-012 — PR description/title edits
 Decision: **A** — do **not** automatically trigger a fresh full review for `pull_request.edited`.
@@ -111,6 +75,65 @@ Implementation consequence:
 - The latest title/body must still be available as review context for the next code-triggered run.
 - `pull_request.edited` may be ingested for durable metadata/history, HITL context, or a future explicit policy-controlled re-review operation.
 - This avoids expensive review churn while preserving the information for the next relevant review.
+
+## Phase 1 owner decisions
+
+### DEC-013 — Autonomy policy evolution
+Decision: **A initially → evolve toward B when evaluation earns it**.
+
+Initial behavior:
+- CRITICAL findings never auto-publish.
+- HIGH findings go to HITL by default during initial production calibration.
+- MEDIUM/LOW findings may auto-publish only when evidence completeness, provenance, retrieval freshness, and calibrated confidence conditions pass.
+- Missing provenance, stale retrieval, incomplete specialist coverage, policy-sensitive findings, or disputed findings route to HITL/block.
+- Repository policy may tighten global behavior but may not weaken global safety invariants.
+
+Future-ready boundary:
+- The policy engine exposes typed inputs for severity, category, calibrated confidence, evidence completeness, retrieval/index health, specialist coverage, dispute state, critical-impact flag, policy-sensitive flag, publication capability, budget state, and reliability state.
+- Routing remains deterministic and versioned.
+- A future calibrated evidence/confidence matrix (Option B) can be introduced without changing specialist or publication interfaces.
+- Fully configurable per-repository matrices remain a later extension, not a first-release requirement.
+
+### DEC-014 — HITL role model
+Decision: **A externally + C internally**.
+
+External product roles initially:
+- **Reviewer:** inspect findings/evidence, approve/reject HITL findings, dispute findings, view authorized review history.
+- **Repository administrator:** all Reviewer capabilities plus integration/repository configuration and permitted repository policy configuration.
+
+Internal authorization boundary:
+- Model authorization as explicit capabilities such as `review.read`, `review.decide`, `review.dispute`, `policy.read`, `policy.write`, `integration.read`, `integration.write`, and `audit.read`.
+- Customer-facing roles are capability bundles, not authorization logic embedded throughout domain code.
+- This permits future enterprise roles without replacing the HITL domain model.
+
+### DEC-015 — Privacy and retention model
+Decision: **C — retention classes**.
+
+Implementation consequence:
+- Security secrets are never stored in application data; use managed secret storage.
+- Repository working trees and expanded review context are ephemeral by default.
+- Retrieved evidence retains only minimum necessary content/provenance for explanation and audit.
+- Raw model prompts/outputs are minimized, redacted, access-controlled, and retained only when needed for audit/evaluation.
+- Findings and HITL decisions are longer-lived product/audit truth.
+- Telemetry follows operational/billing needs without unnecessary customer source retention.
+- Evaluation datasets are separately governed and isolated.
+
+Future-ready boundary:
+- Exact retention durations are configuration/policy, not data-model assumptions.
+- Deletion, export, legal-hold, and backup-erasure workflows are explicit capabilities rather than hard-coded storage behavior.
+
+### DEC-016 — Tool/sandbox execution
+Decision: **A initially → evolve toward B only when evidence justifies it**.
+
+Initial behavior:
+- No arbitrary repository shell/code execution.
+- Review agents use GitHub APIs, repository content, static parsing, retrieval, and model reasoning.
+- Findings must distinguish static/API/CI evidence from any future execution evidence.
+
+Future-ready boundary:
+- Define a separate execution capability/service boundary rather than allowing agents to inherit process privileges.
+- If enabled later, require explicit authorization, filesystem isolation, network policy, CPU/memory/time limits, credential isolation, artifact limits, audit evidence, cleanup, and evaluator isolation.
+- Adding execution must not change the canonical specialist finding contract.
 
 ## Cross-cutting product direction
 
