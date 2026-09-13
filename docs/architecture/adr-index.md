@@ -71,3 +71,71 @@ Status: DRAFT. These ADRs are derived from the project planning source and remai
 **Decision:** Existing `Multiagent-PR-Review-System` code is a reference implementation, not an inherited architecture.
 
 **Rule:** Reuse only after mapping the capability to an approved requirement, checking architecture/trust-boundary compatibility, reviewing impact, and independently verifying behavior.
+
+## ADR-009 — GitHub App least-privilege ingress and publication boundary
+
+**Decision:** Treat GitHub as an authenticated external system behind a dedicated App boundary. Validate webhook signatures before payload interpretation, authorize against the installation before repository access, and request only the minimum permissions required for the current publication contract.
+
+**Initial permission posture:** repository metadata read, contents read, pull requests write, and checks write only if the final dual-publication design proves it necessary. No source write, workflow, secrets, administration, deployment, or unrelated security-alert mutation permissions in the first release.
+
+**Why:** GitHub App permissions control API capabilities and webhook availability; minimum permissions reduce blast radius. Pull-request review creation requires Pull requests write.
+
+**Verification:** ingress contract tests must cover signature failure, duplicate delivery, revoked installation, inaccessible repository, and malformed event cases.
+
+## ADR-010 — Review identity is repository-state-bound and idempotent
+
+**Decision:** Separate delivery identity from logical review identity. A delivery ID suppresses transport duplicates; `(installation, repository, pull request, head SHA)` determines the logical review pass.
+
+**Why:** A PR number alone is insufficient because the same PR evolves across head SHAs and webhook retries can be duplicated. Publication uncertainty also needs stable identities to prevent double posting.
+
+**Required behavior:** same delivery → no duplicate effects; same logical review key → no duplicate fresh pass; new head SHA → supersede stale pending work and review the new state; uncertain publication → retry idempotently by stable IDs.
+
+## ADR-011 — Explicit privacy and retention classes
+
+**Decision:** Use six retention classes: secrets, ephemeral execution context, evidence, findings/HITL/audit, telemetry, and evaluation.
+
+**Constraints:** secrets never enter application database tables; evidence stores only the minimum necessary source/provenance information; model inputs/outputs are minimized and redacted where feasible; evaluation datasets remain separately governed.
+
+**Why:** Retention is a product/data-governance boundary and should not be hidden in arbitrary service defaults.
+
+**Revisit when:** legal, customer, or measured operational requirements define concrete retention periods and deletion/export obligations.
+
+## ADR-012 — No arbitrary repository execution in initial release
+
+**Decision:** The first release performs repository understanding through GitHub APIs, static parsing, retrieval, and model reasoning. It does not run arbitrary repository shell commands, tests, builds, package installers, or generated code.
+
+**Why:** This materially reduces prompt-injection and supply-chain execution risk while establishing the evidence-backed review contract.
+
+**Future path:** if evaluation demonstrates that execution materially improves review quality, introduce it as a separate isolated capability with explicit authorization, network/resource policy, ephemeral storage, credential denial by default, and independent telemetry.
+
+## ADR-013 — Simple customer roles, capability-based internal authorization
+
+**Decision:** Expose two customer-facing roles initially: Reviewer and Repository Administrator. Implement authorization internally as typed capabilities so more granular enterprise roles can be added without changing the domain model.
+
+**Core capabilities:** `review.read`, `review.decide`, `review.dispute`, `policy.read`, `policy.write`, `integration.read`, `integration.write`, `audit.read`.
+
+**Why:** This keeps first-release UX understandable while preserving a future-ready authorization boundary.
+
+## ADR-014 — Managed AWS containers with secret separation
+
+**Decision:** Keep ECS/Fargate as the leading cloud deployment candidate behind an ordinary application/container boundary. Use private networking for internal services, a load balancer for ingress, managed durable storage, managed queue infrastructure, and Secrets Manager for sensitive configuration.
+
+**Security rule:** ECS task execution permissions and application task permissions remain distinct. Application code should receive only the cloud permissions required for its specific operations.
+
+**Revisit when:** load/latency/cost evidence demonstrates a different topology or managed service is materially better.
+
+## ADR-015 — Conditional dual-surface GitHub publication
+
+**Decision:** Design publication for inline review plus a summary/check surface, but allow a deliberate fallback to inline review plus summary when reliable dual publication would require unjustified coupling or permission expansion.
+
+**Constraints:** publication is downstream of normalization, aggregation, deduplication, evidence validation, policy routing, and HITL where required. Every published finding has a stable identity and source commit/head reference.
+
+**Why:** User-visible output is valuable, but publication correctness outranks surface count.
+
+## ADR-016 — Evaluation earns autonomy
+
+**Decision:** Start with conservative autonomy and evolve toward richer calibrated evidence/confidence matrices only when development/holdout evaluation and independent review demonstrate adequate precision, recall, calibration, and operational safety.
+
+**Constraint:** repository-local policy may tighten the global policy but cannot weaken the project's safety invariants.
+
+**Why:** This makes autonomy an evidence-backed product capability rather than a model-confidence feature switch.
