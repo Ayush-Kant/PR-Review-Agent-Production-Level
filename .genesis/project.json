@@ -10,17 +10,20 @@
       "Genesis engineering protocol is mandatory during the project lifecycle.",
       "Product implementation is prohibited until Phase 0 specification and planning gates are satisfied.",
       "Existing Multiagent-PR-Review-System is reference material only.",
-      "Architecture must remain modular and preserve explicit trust boundaries."
+      "Architecture must remain modular and preserve explicit trust boundaries.",
+      "The end-user product is cloud-hosted via a GitHub App; customers do not install or operate our runtime infrastructure.",
+      "Provider/model and embedding choices must remain behind replaceable interfaces until evaluation freezes them."
     ],
     "non_goals": [
       "Build a generic autonomous coding agent instead of a PR review system.",
       "Add infrastructure solely to make the project appear more production-grade.",
       "Treat LLM output or repository content as authoritative instructions.",
-      "Silently promote learned policy changes without measured evaluation and approval."
+      "Silently promote learned policy changes without measured evaluation and approval.",
+      "Require end users to install local workers, databases, queues, runtimes, or model credentials."
     ],
     "trust_boundary": "GitHub events, PR text, repository contents, retrieved code, tool output, and LLM output are untrusted inputs; privileged actions must cross explicit authenticated and authorized boundaries.",
     "created_at": "2026-09-14T00:40:00+05:30",
-    "updated_at": "2026-09-14T00:40:00+05:30"
+    "updated_at": "2026-09-14T02:10:00+05:30"
   },
   "policy": {
     "ponytail": "full",
@@ -37,8 +40,8 @@
     "phase": "discovery",
     "status": "active",
     "active_task": "SPEC-1",
-    "blocker": null,
-    "next_action": "Complete Phase 0 specification, invariants, decisions, risks, and acceptance criteria; no product implementation code is authorized."
+    "blocker": "Phase 0 independent review and human approval are still required before product implementation.",
+    "next_action": "Run Phase 0 verification against the owner decisions and continuity protocol, prepare the independent review, then await human Phase 0 approval."
   },
   "commands": {},
   "workflow": {
@@ -60,26 +63,14 @@
     }
   ],
   "assumptions": [
-    {
-      "id": "ASM-001",
-      "statement": "GitHub is the first supported SCM/provider integration and the primary review publication surface.",
-      "status": "working"
-    },
-    {
-      "id": "ASM-002",
-      "statement": "The initial specialist set is security, quality, tests, and documentation.",
-      "status": "working"
-    },
-    {
-      "id": "ASM-003",
-      "statement": "LangGraph may be used as the first workflow engine implementation behind an internal abstraction.",
-      "status": "working"
-    },
-    {
-      "id": "ASM-004",
-      "statement": "Tiger Cloud/Postgres-compatible storage is the intended durable data spine, subject to Phase 1/architecture validation.",
-      "status": "working"
-    }
+    {"id":"ASM-001","statement":"GitHub is the first supported SCM/provider integration and the primary review publication surface.","status":"working"},
+    {"id":"ASM-002","statement":"The initial specialist set is security, quality, tests, and documentation.","status":"working"},
+    {"id":"ASM-003","statement":"LangGraph may be used as the first workflow engine implementation behind an internal abstraction.","status":"working"},
+    {"id":"ASM-004","statement":"Tiger Cloud/Postgres-compatible storage is the intended durable data spine, subject to Phase 1/architecture validation.","status":"working"},
+    {"id":"ASM-005","statement":"The customer experience is a hosted SaaS product using a GitHub App; customer-side infrastructure is not required.","status":"accepted"},
+    {"id":"ASM-006","statement":"Initial target languages are Python, JavaScript, TypeScript, Java, and Spring Boot, with emphasis on AI/ML and MERN/PERN/modern JS/TS workloads.","status":"accepted"},
+    {"id":"ASM-007","statement":"Managed container deployment is preferred; AWS ECS/Fargate is an approved candidate subject to Phase 1 verification.","status":"accepted"},
+    {"id":"ASM-008","statement":"GitHub App installation scope should support both repository/user-oriented and organization/account-oriented flows where practical, with simplification allowed if complexity becomes disproportionate.","status":"accepted"}
   ],
   "invariants": [
     {"id":"INV-001","statement":"No finding is published without attributable evidence tied to the reviewed change and repository context."},
@@ -93,16 +84,35 @@
     {"id":"INV-009","statement":"Evaluation artifacts and evaluators must be protected from modification by the candidate system under test."},
     {"id":"INV-010","statement":"Learning or policy changes require measurable baseline/candidate evaluation, independent review, explicit promotion, and rollback capability."},
     {"id":"INV-011","statement":"The system must prefer slower-but-correct behavior over fast-but-unjustified review output."},
-    {"id":"INV-012","statement":"Durable project decisions, requirements, assumptions, and operational knowledge must not exist only in chat history."}
+    {"id":"INV-012","statement":"Durable project decisions, requirements, assumptions, and operational knowledge must not exist only in chat history."},
+    {"id":"INV-013","statement":"Customer repository access must be scoped through the authorized GitHub App installation and application authorization context; dashboard visibility is never sufficient authorization."},
+    {"id":"INV-014","statement":"The vector dimension is not authoritative until a retrieval benchmark selects the embedding model and compatibility is verified."},
+    {"id":"INV-015","statement":"Chat-session continuity must be recoverable from repository state without requiring conversational memory."}
   ],
   "decisions": [
     {"id":"D0-001","statement":"The new repository is greenfield; the previous PR-review repository is reference material, not the architectural source of truth."},
     {"id":"D0-002","statement":"develop is the construction and verification branch; main represents production intent."},
     {"id":"D0-003","statement":"Phase 0 must complete specification and planning gates before product implementation begins."},
     {"id":"D0-004","statement":"The production system is designed around explicit evidence, policy, auditability, and human escalation rather than comment volume."},
-    {"id":"D0-005","statement":"Specialist agents are parallel domain reviewers; the aggregator is the authority for normalized findings and publication eligibility."}
+    {"id":"D0-005","statement":"Specialist agents are parallel domain reviewers; the aggregator is the authority for normalized findings and publication eligibility."},
+    {"id":"D0-006","statement":"LLM strategy is provider-neutral abstraction with one evaluated initial provider/model."},
+    {"id":"D0-007","statement":"Embedding selection requires a retrieval benchmark before the concrete model and vector dimension are frozen."},
+    {"id":"D0-008","statement":"GitHub publication is designed for inline review plus a summary/check surface, with a fallback to inline review plus summary if reliable dual publication cannot be achieved without unjustified complexity."},
+    {"id":"D0-009","statement":"Initial language support targets Python, JavaScript, TypeScript, Java, and Spring Boot for AI/ML and MERN/PERN/modern JS/TS workloads."},
+    {"id":"D0-010","statement":"HITL uses GitHub identity with a pluggable application RBAC layer so simpler GitHub-only authorization can be introduced without domain redesign."},
+    {"id":"D0-011","statement":"Production autonomy is configurable per repository with conservative defaults; autonomy is decided by policy, not by LLM confidence alone."},
+    {"id":"D0-012","statement":"Frontend is minimal and capability-driven rather than speculative."},
+    {"id":"D0-013","statement":"Customer experience is cloud SaaS via GitHub App; customer-side runtime infrastructure is not required."},
+    {"id":"D0-014","statement":"Large PRs use staged/degraded review with explicit limitations and human-directed multi-pass review where required."},
+    {"id":"D0-015","statement":"Managed container deployment is preferred; AWS ECS/Fargate is an approved deployment candidate subject to verification."},
+    {"id":"D0-016","statement":"GitHub App installation scope aims for both user/repository-oriented and organization/account-oriented flows, with fallback to a simpler model if combined complexity becomes disproportionate."},
+    {"id":"D0-017","statement":"The repository must contain an explicit cross-chat handoff protocol and checkpoint artifact so a fresh session can recover the exact project state."}
   ],
-  "knowledge": [],
+  "knowledge": [
+    {"id":"K-001","statement":"The end-user deployment model is a hosted GitHub-native SaaS: browser login, GitHub App installation/authorization, repository selection, cloud review execution, and GitHub-native publication."},
+    {"id":"K-002","statement":"Embedding vector dimension is a derived parameter that follows the selected embedding model after retrieval benchmarking and compatibility verification; prior fixed-dimension planning examples are non-authoritative."},
+    {"id":"K-003","statement":"CONTINUE-HERE.md is a session handoff artifact. Canonical authority remains Genesis state plus approved specification/architecture artifacts."}
+  ],
   "tasks": [
     {
       "id":"SPEC-1",
@@ -110,24 +120,20 @@
       "state":"active",
       "risk":"medium",
       "owner":null,
-      "scope":["SPEC.md","docs/phase-0.md",".genesis/project.json"],
+      "scope":["SPEC.md","docs/phase-0.md",".genesis/project.json","docs/architecture/owner-decisions-2026-09-14.md","CONTINUE-HERE.md"],
       "inputs":[],
       "environment":[],
       "dependencies":[],
       "requirements":[],
-      "scenarios":[
-        {"actor":"product owner","scope":"Phase 0 specification","environment":"repository develop branch","duration":"one bounded task","observable":"all required specification sections and identifiers are complete","gate":"manual specification review"}
-      ],
-      "gates":[
-        {"id":"independent-review","command":"","mandatory":true,"kind":"review","status":"pending","evidence":null}
-      ],
-      "next_action":"Complete Phase 0 specification, invariants, decisions, risks, metrics, and open questions without writing product implementation code.",
-      "blocker":null,
-      "notes":[],
+      "scenarios":[{"actor":"product owner","scope":"Phase 0 specification","environment":"repository develop branch","duration":"one bounded task","observable":"all required specification sections and identifiers are complete","gate":"manual specification review"}],
+      "gates":[{"id":"independent-review","command":"","mandatory":true,"kind":"review","status":"pending","evidence":null}],
+      "next_action":"Run Phase 0 verification, prepare independent review, and await human approval before product implementation.",
+      "blocker":"Independent review and human approval are pending.",
+      "notes":["Owner architecture decisions DEC-001..DEC-011 are recorded in docs/architecture/owner-decisions-2026-09-14.md.","Cross-chat recovery protocol is recorded in CONTINUE-HERE.md."],
       "failures":[],
       "limitations":[],
       "created_at":"2026-09-14T00:40:00+05:30",
-      "updated_at":"2026-09-14T00:40:00+05:30"
+      "updated_at":"2026-09-14T02:10:00+05:30"
     }
   ],
   "learning_proposals": [],
@@ -137,11 +143,7 @@
   "authorizations": [],
   "experiments": [],
   "incidents": [],
-  "discovery": {
-    "status":"greenfield",
-    "reference_repository":"Ayush-Kant/Multiagent-PR-Review-System",
-    "reference_policy":"reuse ideas only after explicit requirement, impact analysis, and verification"
-  },
-  "checkpoint": null,
+  "discovery": {"status":"greenfield","reference_repository":"Ayush-Kant/Multiagent-PR-Review-System","reference_policy":"reuse ideas only after explicit requirement, impact analysis, and verification"},
+  "checkpoint": {"at":"2026-09-14T02:10:00+05:30","artifact":"CONTINUE-HERE.md","status":"verified-handoff-pending-cold-session-check"},
   "legacy": null
 }
