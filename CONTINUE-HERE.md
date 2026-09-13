@@ -22,24 +22,28 @@ Production-intent branch: `main`
 
 ## Current gate
 
-**Production application/agent implementation is still blocked.** Genesis requires Phase 0 independent review + human approval before Phase 1 becomes green, and Phase 1 must be green before product implementation starts.
+**Production application/agent implementation is still blocked.** Genesis requires a qualifying Phase 0 independent review + human approval before Phase 1 becomes green, and Phase 1 must be green before product implementation starts.
 
 ## Work completed in this session
 
 - Recorded owner decisions in `docs/architecture/owner-decisions-2026-09-14.md`.
 - Updated `docs/architecture/decision-queue.md` with closed owner decisions and remaining technical decisions.
 - Refined `docs/architecture/phase-1-proposal.md` for the cloud GitHub-App SaaS model, installation/tenant boundaries, large-PR passes, retrieval benchmark, and managed deployment.
-- Added and persisted this handoff protocol.
+- Added and persisted the cross-chat handoff protocol.
 - Synchronized `.genesis/project.json` with the owner decisions, SaaS/cloud constraints, new invariants, and continuity rule.
+- Performed a Phase 0 independent verification pass and recorded it in `docs/phase-0-independent-review.md`. Result: **conditional / not green**; no new product contradiction found, but the required qualifying independent review/human approval remains outstanding.
+
+## Latest checkpoint
+
+The current `develop` HEAD must be verified before continuing. The latest confirmed Genesis synchronization point is the commit that records the owner decisions, SaaS/cloud constraints, continuity invariant, and review gate state. The independent-review artifact is now also part of the Phase 0 package.
 
 ## Next admissible work
 
 1. Verify the current `develop` HEAD and canonical Genesis file.
-2. Perform Phase 0 verification/independent review.
+2. Obtain/record a qualifying independent review under the Genesis process and human Phase 0 approval.
 3. Resolve only the remaining technical decisions listed in `docs/architecture/decision-queue.md` as required for Phase 1.
-4. Obtain human Phase 0 approval.
-5. Run Phase 1 independent review and green gate.
-6. Then begin bounded product implementation tasks.
+4. Run Phase 1 independent review and green gate.
+5. Then begin bounded product implementation tasks.
 
 ## Cross-chat rule
 
@@ -55,8 +59,9 @@ First read and verify:
 2. .genesis/project.json
 3. SPEC.md
 4. docs/phase-0.md
-5. applicable architecture/ADR files
-6. latest Git history on develop
+5. docs/phase-0-independent-review.md
+6. applicable architecture/ADR files
+7. latest Git history on develop
 
 Treat the repository as the durable source of truth, not previous chat memory.
 Verify the latest checkpoint against the current repository, identify the next admissible Genesis task, and continue exactly from there.
@@ -64,4 +69,4 @@ Do not repeat completed discovery, do not silently change product-owner decision
 If any contradiction exists between handoff and canonical Genesis state, reconcile it from the higher-priority source rather than guessing.
 ```
 
-Before handoff, ensure durable decisions, active task, blocker, next action, and unfinished work are represented in the repository.
+Before handoff, ensure durable decisions, active task, blocker, next action, latest checkpoint, and unfinished work are represented in the repository.
