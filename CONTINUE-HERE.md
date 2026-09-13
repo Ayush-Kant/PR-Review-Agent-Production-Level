@@ -12,38 +12,52 @@ Production-intent branch: `main`
 - Embeddings: benchmark retrieval first; derive/freeze vector dimension only after model selection and compatibility verification.
 - Publication: design for inline review + summary/check; if dual publication cannot be made reliable without unjustified complexity, ship inline review + summary only.
 - Languages: Python, JavaScript, TypeScript, Java, Spring Boot, focused on AI/ML and MERN/PERN/modern JS/TS workloads.
-- HITL: GitHub identity + pluggable application RBAC.
-- Autonomy: per-repository configurable policy, conservative by default.
+- HITL identity: GitHub identity + pluggable application RBAC.
+- Autonomy: per-repository configurable policy, conservative by default. Exact policy matrix remains an owner decision under TDEC-005.
 - Frontend: minimal/capability-driven.
 - Customer experience: hosted cloud SaaS via GitHub App; no customer-side runtime infrastructure.
 - Large PRs: staged/degraded multi-pass review with explicit limitations + human intervention.
 - Deployment: managed containers; AWS ECS/Fargate is an approved candidate.
 - GitHub App installation scope: C, with fallback to simpler B if complexity becomes disproportionate.
+- PR title/body edits: do not automatically trigger a fresh full review; preserve edited metadata for later code-triggered review context.
 
 ## Current gate
 
-**Production application/agent implementation is still blocked.** Genesis requires a qualifying Phase 0 independent review + human approval before Phase 1 becomes green, and Phase 1 must be green before product implementation starts.
+**Production application/agent implementation is still blocked.** Phase 0 is approved in canonical Genesis state. Phase 1 remains in planning until the requirement-linked plan is checked, independently reviewed, and explicitly approved.
 
-## Work completed in this session
+## Phase 1 progress
 
-- Recorded owner decisions in `docs/architecture/owner-decisions-2026-09-14.md`.
-- Updated `docs/architecture/decision-queue.md` with closed owner decisions and remaining technical decisions.
-- Refined `docs/architecture/phase-1-proposal.md` for the cloud GitHub-App SaaS model, installation/tenant boundaries, large-PR passes, retrieval benchmark, and managed deployment.
-- Added and persisted the cross-chat handoff protocol.
-- Synchronized `.genesis/project.json` with the owner decisions, SaaS/cloud constraints, new invariants, and continuity rule.
-- Performed a Phase 0 independent verification pass and recorded it in `docs/phase-0-independent-review.md`. Result: **conditional / not green**; no new product contradiction found, but the required qualifying independent review/human approval remains outstanding.
+Completed or recommendation-ready:
 
-## Latest checkpoint
+- GitHub App permission and webhook analysis: `docs/architecture/phase-1-github-boundary-analysis.md`
+- Review identity/installation/tenancy analysis: `docs/architecture/phase-1-identity-tenancy-analysis.md`
+- Retrieval/embedding benchmark contract: `docs/architecture/phase-1-retrieval-benchmark.md`
+- Autonomy policy alternatives: `docs/architecture/phase-1-autonomy-policy-analysis.md`
+- HITL role alternatives: `docs/architecture/phase-1-hitl-role-analysis.md`
+- Privacy/retention model: `docs/architecture/phase-1-privacy-retention-analysis.md`
+- Managed AWS topology: `docs/architecture/phase-1-aws-topology-analysis.md`
+- Tool/sandbox execution boundary: `docs/architecture/phase-1-tool-sandbox-analysis.md`
+- Phase 1 bounded task map: `docs/architecture/phase-1-plan.md`
+- Decision queue synchronized with investigation status: `docs/architecture/decision-queue.md`
 
-The current `develop` HEAD must be verified before continuing. The latest confirmed Genesis synchronization point is the commit that records the owner decisions, SaaS/cloud constraints, continuity invariant, and review gate state. The independent-review artifact is now also part of the Phase 0 package.
+## Remaining owner decisions blocking affected architecture contracts
+
+1. TDEC-005 — choose autonomy policy Option A/B/C. Recommendation: A initially.
+2. TDEC-006 — choose HITL role Option A/B/C. Recommendation: A initially behind capability-based authorization.
+3. TDEC-007 — approve retention-class model and later choose exact durations/deletion-export commitments.
+4. TDEC-009 — choose tool/sandbox Option A/B/C. Recommendation: A initially (no arbitrary code execution).
+
+TDEC-008 remains a technical verification item; the leading AWS topology is documented but still requires final security/cost verification before production deployment is treated as fixed.
 
 ## Next admissible work
 
-1. Verify the current `develop` HEAD and canonical Genesis file.
-2. Obtain/record a qualifying independent review under the Genesis process and human Phase 0 approval.
-3. Resolve only the remaining technical decisions listed in `docs/architecture/decision-queue.md` as required for Phase 1.
-4. Run Phase 1 independent review and green gate.
-5. Then begin bounded product implementation tasks.
+After the owner decisions above are resolved:
+
+1. finalize the affected Phase 1 architecture contracts;
+2. run full Genesis plan check and requirement traceability;
+3. perform independent Phase 1 review;
+4. obtain explicit Phase 1 green approval;
+5. only then activate the first bounded product implementation task.
 
 ## Cross-chat rule
 
@@ -60,8 +74,10 @@ First read and verify:
 3. SPEC.md
 4. docs/phase-0.md
 5. docs/phase-0-independent-review.md
-6. applicable architecture/ADR files
-7. latest Git history on develop
+6. docs/architecture/phase-1-plan.md
+7. docs/architecture/decision-queue.md
+8. applicable architecture/ADR files
+9. latest Git history on develop
 
 Treat the repository as the durable source of truth, not previous chat memory.
 Verify the latest checkpoint against the current repository, identify the next admissible Genesis task, and continue exactly from there.
