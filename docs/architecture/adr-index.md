@@ -2,13 +2,15 @@
 
 Status: DRAFT. These ADRs are derived from the project planning source and remain subject to Phase 1 verification before implementation.
 
-## ADR-001 — LangGraph behind a workflow-engine interface
+## ADR-001 — Workflow engine behind an internal workflow contract
 
-**Decision:** Use LangGraph as the first workflow implementation, behind `core.workflow_engine`.
+**Decision:** Use LangGraph as the first workflow implementation behind the explicit `workflow` contract module.
 
 **Why:** The initial workload requires four-way parallel fan-out, typed state, checkpoint/resume, and LLM-oriented orchestration. The planning source identifies LangGraph as the lower-operational-cost choice for the first system.
 
-**Constraint:** No surrounding module may depend directly on LangGraph-specific APIs. A future Temporal implementation must be able to replace the engine behind the interface.
+**Boundary:** `workflow` owns the application-facing workflow-engine interface for start/resume/query and execution lifecycle semantics. `integrations/workflow_langgraph` implements that contract. No surrounding module may depend directly on LangGraph-specific APIs.
+
+**Constraint:** A future Temporal implementation must be able to replace the engine behind the same `workflow` contract.
 
 **Revisit when:** sustained concurrent workflow demand, cross-service coordination, or checkpoint durability requirements demonstrate that a different engine is justified.
 
@@ -124,7 +126,7 @@ Status: DRAFT. These ADRs are derived from the project planning source and remai
 
 **Revisit when:** load/latency/cost evidence demonstrates a different topology or managed service is materially better.
 
-## ADR-015 — Conditional dual-surface GitHub publication
+## ADR-015 — Conditional dual surface GitHub publication
 
 **Decision:** Design publication for inline review plus a summary/check surface, but allow a deliberate fallback to inline review plus summary when reliable dual publication would require unjustified coupling or permission expansion.
 
