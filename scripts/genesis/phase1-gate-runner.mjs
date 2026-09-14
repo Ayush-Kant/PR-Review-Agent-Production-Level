@@ -37,12 +37,98 @@ function requirementsFromSpec() {
   return [...spec.matchAll(/(?:FR|NFR|AC)-\d{3}/g)].map((m) => m[0]);
 }
 
+function parseModuleMatrix() {
+  const matrix = read('docs/architecture/module-ownership-matrix.md');
+  const modules = new Set();
+  const ownershipRows = [...matrix.matchAll(/^\| `([^`]+)` \|/gm)].map((match) => match[1]);
+  for (const module of ownershipRows) modules.add(module);
+
+  const layerText = matrix.match(/## 2\. Layer model[\s\S]*?## 3\. Module ownership matrix/);
+  assert(layerText, 'module layer model missing');
+
+  const edgeSection = matrix.match(/## 4\. Allowed dependency edges[\s\S]*?## 5\. Explicitly forbidden dependency patterns/);
+  assert(edgeSection, 'allowed dependency section missing');
+
+  const edges = [];
+  for (const raw of edgeSection[0].split('\n')) {
+    const match = raw.match(/^([a-zA-Z0-9_/-]+) -> (.+)$/);
+    if (!match) continue;
+    const source = match[1];
+    const targets = match[2].split(',').map((item) => item.trim()).filter(Boolean);
+    for (const target of targets) edges.push([source, target]);
+  }
+
+  const requiredContractModules = ['workflow', 'data', 'model_provider', 'telemetry'];
+  for (const module of requiredContractModules) {
+    assert(modules.has(module), `required contract module ${module} is missing from ownership matrix`);
+  }
+
+  assert(modules.size === ownershipRows.length, 'module ownership matrix contains duplicate module rows');
+  assert(edges.length > 0, 'allowed dependency graph is empty');
+
+  for (const [source, target] of edges) {
+    assert(modules.has(source), `allowed edge source ${source} is not a declared module`);
+    assert(modules.has(target), `allowed edge target ${target} is not a declared module`);
+  }
+
+  const requiredEdges = [
+    ['workflow', 'models'],
+    ['data', 'models'],
+    ['model_provider', 'models'],
+    ['telemetry', 'models'],
+    ['integrations/workflow_langgraph', 'workflow'],
+    ['integrations/model_provider', 'model_provider'],
+    ['database', 'data'],
+    ['observability', 'telemetry'],
+    ['agents', 'model_provider'],
+    ['orchestrator', 'workflow'],
+    ['orchestrator', 'data'],
+  ];
+
+  for (const [source, target] of requiredEdges) {
+    assert(edges.some(([s, t]) => s === source && t === target), `required dependency edge ${source} -> ${target} is missing`);
+  }
+
+  const forbiddenPairs = [
+    ['workflow', 'integrations/workflow_langgraph'],
+    ['data', 'database'],
+    ['model_provider', 'integrations/model_provider'],
+    ['telemetry', 'observability'],
+    ['agents', 'integrations/github'],
+    ['agents', 'database'],
+    ['orchestrator', 'integrations/workflow_langgraph'],
+    ['orchestrator', 'integrations/model_provider'],
+    ['api', 'database'],
+    ['integrations/github', 'orchestrator'],
+  ];
+
+  for (const [source, target] of forbiddenPairs) {
+    assert(!edges.some(([s, t]) => s === source && t === target), `forbidden dependency edge ${source} -> ${target} is present`);
+  }
+
+  assert(matrix.includes('## 6. Interface ownership rule'), 'interface ownership section missing');
+  assert(matrix.includes('| Workflow engine | `workflow` | `integrations/workflow_langgraph` |'), 'workflow ownership mapping missing');
+  assert(matrix.includes('| Persistence repositories | `data` | `database`'), 'persistence ownership mapping missing');
+  assert(matrix.includes('| Model/provider | `model_provider` | `integrations/model_provider`'), 'model-provider ownership mapping missing');
+  assert(matrix.includes('| Telemetry/event emission | `telemetry` | `observability`'), 'telemetry ownership mapping missing');
+
+  return { modules, edges };
+}
+
 function p1_01() {
-  test('P1-01 architecture invariant package', () => {
-    const s = read('docs/architecture/phase-1-architecture-invariants.md');
-    assert(s.includes('inward-only'), 'missing inward-only dependency rule');
-    assert(s.includes('No untrusted data may select privileged control'), 'missing trust-control invariant');
-    assert(s.includes('publication authority'), 'missing publication authority invariant');
+  test('P1-01 architecture ownership, dependency, and invariant package', () => {
+    const invariants = read('docs/architecture/phase-1-architecture-invariants.md');
+    assert(invariants.includes('inward-only'), 'missing inward-only dependency rule');
+    assert(invariants.includes('No untrusted data may select privileged control'), 'missing trust-control invariant');
+    assert(invariants.includes('publication authority'), 'missing publication authority invariant');
+
+    const refinement = read('docs/architecture/p1-01-contract-refinement-2026-09-14.md');
+    assert(refinement.includes('workflow'), 'P1-01 refinement record is missing workflow contract ownership');
+    assert(refinement.includes('model_provider'), 'P1-01 refinement record is missing model/provider contract ownership');
+    assert(refinement.includes('telemetry'), 'P1-01 refinement record is missing telemetry contract ownership');
+    assert(refinement.includes('data'), 'P1-01 refinement record is missing persistence contract ownership');
+
+    parseModuleMatrix();
   });
 }
 
